@@ -1,0 +1,209 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+A	robot.hpp	/^    arma::mat A;                    \/\/ The adjacency matrix$/;"	m	struct:msg
+A_l	robot.hpp	/^    arma::mat A_l, A_p;             \/\/ Logical and physical adjacency matrices$/;"	m	class:robot
+A_p	robot.hpp	/^    arma::mat A_l, A_p;             \/\/ Logical and physical adjacency matrices$/;"	m	class:robot
+BIG_VAL	defines.hpp	12;"	d
+B_SIZE	node.hpp	23;"	d
+CC	makefile	/^CC = g++$/;"	m
+CFLAGS	makefile	/^CFLAGS = -Wall -Wextra -Wfatal-errors -pedantic -ggdb3 -std=c++0x -O0$/;"	m
+Close	MatFile.cpp	/^bool MatFile::Close()$/;"	f	class:MatFile
+DEFINES_H	defines.hpp	8;"	d
+EXECUTABLE	makefile	/^EXECUTABLE = $(addprefix $(OUTDIR)\/, main)$/;"	m
+FILEUTILS_H	file_utils.hpp	7;"	d
+GRAPHUTILS_H	graph_utils.hpp	7;"	d
+HIST_SIZE	defines.hpp	13;"	d
+INCLUDES	makefile	/^INCLUDES = -I..\/lib$/;"	m
+IsOpen	MatFile.cpp	/^bool MatFile::IsOpen() const$/;"	f	class:MatFile
+KOPT_H	k_optimization.hpp	7;"	d
+LDFLAGS	makefile	/^LDFLAGS = -L..\/lib$/;"	m
+LIBS	makefile	/^LIBS = -lgurobi_g++4.1 -lgurobi56 -larmadillo -lQuadProgpp -lhdf5 -lhdf5_hl$/;"	m
+LOWER	utils.hpp	108;"	d
+MATFILE_H	MatFile.h	2;"	d
+MIN_ERR	defines.hpp	11;"	d
+MOTIONCONTROL_H	motion_control.hpp	7;"	d
+MatFile	MatFile.cpp	/^MatFile::MatFile() : file(-1)$/;"	f	class:MatFile
+MatFile	MatFile.cpp	/^MatFile::MatFile(const string& fn) : file(-1)$/;"	f	class:MatFile
+MatFile	MatFile.h	/^class MatFile$/;"	c
+N1	graph_utils.hpp	16;"	d
+NODE_H	node.hpp	8;"	d
+N_1	robot.hpp	/^    arma::rowvec N_1;$/;"	m	class:robot
+OBJDIR	makefile	/^OBJDIR = ..\/obj$/;"	m
+OBJECTS	makefile	/^OBJECTS = $(addprefix $(OBJDIR)\/, $(SOURCES:.cpp=.o))$/;"	m
+OUTDIR	makefile	/^OUTDIR = ..\/bin$/;"	m
+Open	MatFile.cpp	/^bool MatFile::Open(const string& fn)$/;"	f	class:MatFile
+Open2Read	MatFile.cpp	/^bool MatFile::Open2Read(const string& fn)$/;"	f	class:MatFile
+PI	defines.hpp	10;"	d
+PrependHeader	MatFile.cpp	/^bool MatFile::PrependHeader(const char* filename)$/;"	f	class:MatFile
+RA	graph_utils.hpp	15;"	d
+ROBOT_H	robot.hpp	8;"	d
+ROS_INTERFACE_H	ros_interface.hpp	8;"	d
+SOURCES	makefile	/^SOURCES = $(wildcard *.cpp)$/;"	m
+T_REAL	node.hpp	18;"	d
+T_STAGE	node.hpp	19;"	d
+T_TURTLE	node.hpp	20;"	d
+UPPER	utils.hpp	107;"	d
+UTILS_H	utils.hpp	7;"	d
+WriteCube	MatFile.cpp	/^bool MatFile::WriteCube(const string& varname, int nx, int ny, int nz, const double* data)$/;"	f	class:MatFile
+WriteMatrix	MatFile.cpp	/^bool MatFile::WriteMatrix(const string& varname, int nx, int ny, const double* data)$/;"	f	class:MatFile
+WriteValue	MatFile.h	/^	bool WriteValue(const std::string& varname, double v)$/;"	f	class:MatFile
+WriteVector	MatFile.cpp	/^bool MatFile::WriteVector(const string& varname, int nx, const double* data)$/;"	f	class:MatFile
+bot_type	robot.hpp	/^    unsigned int bot_type;          \/\/ Type of the robot (T_STAGE,T_REAL,T_TURTLE)$/;"	m	class:robot
+c_node	robot.hpp	/^    unsigned int c_node;$/;"	m	struct:cnode
+c_nodes	robot.hpp	/^    std::vector<cnode> c_nodes;     \/\/ Critical nodes in the neighborhood$/;"	m	class:robot
+calc_time	utils.cpp	/^double calc_time(clock_t t0, clock_t t1) {$/;"	f
+check_input_error	file_utils.cpp	/^void check_input_error(topology input) {$/;"	f
+cnode	robot.hpp	/^typedef struct cnode {$/;"	s
+cnode	robot.hpp	/^} cnode;$/;"	t	typeref:struct:cnode
+com_c	file_utils.hpp	/^	bool com_c;				\/\/ Communication radius constraint$/;"	m	struct:topology
+combine	graph_utils.cpp	/^void combine(umat &S, unsigned int depth, unsigned int n) {$/;"	f
+combine	graph_utils.cpp	/^void combine(umat &S, vector<unsigned int> sg, unsigned int id, unsigned int depth, unsigned int n, unsigned int &id_s, unsigned int id_sg) {$/;"	f
+connectivity_control	motion_control.cpp	/^vec connectivity_control(unsigned int id, mat A_l, uvec N_l, mat x, rowvec x_r, mat v, float dt, vec r_sec, vec r_com, bool sec_c, bool com_c, unsigned int opt_type) {$/;"	f
+contains	utils.cpp	/^bool contains(float elem, vec array) {$/;"	f
+contains	utils.cpp	/^bool contains(std::string input, std::string search) {$/;"	f
+contains	utils.cpp	/^bool contains(std::string input, std::string search, unsigned int &init_pose, unsigned int &end_pose) {$/;"	f
+contains	utils.cpp	/^bool contains(unsigned int elem, uvec array) {$/;"	f
+contains	utils.hpp	/^template <typename T> bool contains(const T elem, std::vector<T> array) {$/;"	f
+contains	utils.hpp	/^template <typename T> bool contains(const T elem, unsigned int &pose, std::vector<T> array) {$/;"	f
+create2D	utils.hpp	/^template <class T> T **create2D(int rows, int cols) {$/;"	f
+critical_nodes	graph_utils.cpp	/^uvec critical_nodes(mat A) {$/;"	f
+dc	file_utils.hpp	/^	unsigned int dc;		\/\/ Data capture frequency$/;"	m	struct:topology
+dist	utils.cpp	/^float dist(rowvec a, rowvec b) {$/;"	f
+edge	k_optimization.hpp	/^typedef struct edge {$/;"	s
+edge	k_optimization.hpp	/^} edge;$/;"	t	typeref:struct:edge
+file	MatFile.h	/^	hid_t file; \/\/ -ve is invalid.$/;"	m	class:MatFile
+filename	MatFile.h	/^	std::string filename;$/;"	m	class:MatFile
+fill_array	file_utils.cpp	/^mat fill_array(const string search_key, ifstream &file_input) {$/;"	f
+fill_vec	utils.cpp	/^void fill_vec(vector<int> &vec, urowvec elems) {$/;"	f
+find_char	utils.cpp	/^bool find_char(std::string input, char search) {$/;"	f
+find_char	utils.cpp	/^bool find_char(std::string input, char search, unsigned int& pos) {$/;"	f
+find_value	utils.cpp	/^bool find_value(int value, vector<int> vec) {$/;"	f
+find_value	utils.cpp	/^bool find_value(int value, vector<int> vec, unsigned int &pose) {$/;"	f
+get_data	file_utils.cpp	/^rowvec get_data(const string search_key, ifstream &file_input) {$/;"	f
+get_float	utils.cpp	/^vector<float> get_float(std::string input) {$/;"	f
+i	k_optimization.hpp	/^	unsigned int i;	\/\/ i vertice$/;"	m	struct:edge
+id	node.hpp	/^    int id;$/;"	m	class:node
+id	robot.hpp	/^    unsigned int id;                \/\/ Unique identifier for the robot$/;"	m	struct:msg
+id	robot.hpp	/^    unsigned int id;                \/\/ Unique identifier$/;"	m	class:robot
+ident	utils.hpp	/^template <typename T> QuadProgPP::Matrix<T> ident(const unsigned int ord) {$/;"	f
+info_scope	file_utils.hpp	/^	bool info_scope;		\/\/ Scope of the information$/;"	m	struct:topology
+init	robot.cpp	/^void robot::init(int id, float r_com, float r_sec, rowvec x, rowvec v, unsigned int opt_type, bool ref_pass) {$/;"	f	class:robot
+init_v	file_utils.hpp	/^	arma::mat init_v;		\/\/ Initial velocities array$/;"	m	struct:topology
+init_x	file_utils.hpp	/^	arma::mat init_x;		\/\/ Initial positions array$/;"	m	struct:topology
+is_biconnected	robot.hpp	/^    bool is_biconnected;$/;"	m	class:robot
+is_connected	graph_utils.cpp	/^bool is_connected(mat A) {$/;"	f
+is_critical	graph_utils.cpp	/^bool is_critical(mat A, unsigned int node) {$/;"	f
+is_symmetric	graph_utils.cpp	/^bool is_symmetric(mat m) {$/;"	f
+j	k_optimization.hpp	/^	unsigned int j;	\/\/ j vertice$/;"	m	struct:edge
+logic_and	graph_utils.cpp	/^mat logic_and(mat x, mat y) {$/;"	f
+logic_or	graph_utils.cpp	/^mat logic_or(mat x, mat y) {$/;"	f
+logic_or	graph_utils.cpp	/^mat logic_or(mat x, mat y, mat pose) {$/;"	f
+logic_or_vec	graph_utils.cpp	/^uvec logic_or_vec(uvec x, uvec y) {$/;"	f
+main	main.cpp	/^int main(int argc, char** argv) {$/;"	f
+make_cnode	robot.cpp	/^void robot::make_cnode(unsigned int id, vlink v_link) {$/;"	f	class:robot
+mat_2_spmat	graph_utils.cpp	/^sp_mat mat_2_spmat(mat m) {$/;"	f
+max	utils.hpp	/^template <typename T> T max(const T e1, const T e2) {$/;"	f
+max_float	utils.cpp	/^float max_float(float x, float y) {$/;"	f
+min	utils.hpp	/^template <typename T> T min(const T e1, const T e2) {$/;"	f
+min_mat	graph_utils.cpp	/^std::vector<mat> min_mat(unsigned int id, mat A, unsigned int mode) {$/;"	f
+min_mat3	graph_utils.cpp	/^std::vector<mat> min_mat3(mat A) {$/;"	f
+motion_control	robot.cpp	/^void robot::motion_control(const unsigned int mode, const bool sec_c, const bool com_c) {$/;"	f	class:robot
+msg	robot.hpp	/^typedef struct msg {$/;"	s
+msg	robot.hpp	/^} msg;$/;"	t	typeref:struct:msg
+msg_count	robot.cpp	/^void robot::msg_count(int id_j) {$/;"	f	class:robot
+msg_num	robot.hpp	/^    arma::umat msg_num;$/;"	m	class:robot
+msg_update	robot.cpp	/^void robot::msg_update() {$/;"	f	class:robot
+mst_optimization	k_optimization.cpp	/^mat mst_optimization(mat A) {$/;"	f
+n_bots	file_utils.hpp	/^	unsigned int n_bots;	\/\/ Number of robots$/;"	m	struct:topology
+n_bots	robot.hpp	/^    unsigned int n_bots;            \/\/ Number of robots in the network$/;"	m	class:robot
+n_iter	file_utils.hpp	/^	unsigned int n_iter;	\/\/ Number of interations$/;"	m	struct:topology
+nh	node.hpp	/^    ros::NodeHandle nh;$/;"	m	class:node
+node	node.hpp	/^class node {$/;"	c
+node_j	robot.hpp	/^    unsigned int node_j;$/;"	m	struct:vlink
+node_k	robot.hpp	/^    unsigned int node_k;$/;"	m	struct:vlink
+nodes_ptr	ros_interface.hpp	/^    std::vector<node*> nodes_ptr;$/;"	m	class:ros_interface
+norm_2	utils.hpp	/^template <class T> float norm_2(const T in, const unsigned int in_size) {$/;"	f
+opt_type	file_utils.hpp	/^	unsigned int opt_type;	\/\/ Topology control type$/;"	m	struct:topology
+opt_type	robot.hpp	/^    unsigned int opt_type;          \/\/ Type of topology control$/;"	m	class:robot
+pitch	node.hpp	/^    double pitch;   \/\/ longitudinal axis (Y)$/;"	m	struct:position
+pitch	node.hpp	/^    double pitch;   \/\/ longitudinal axis angular velocity$/;"	m	struct:velocity
+pose	node.hpp	/^    position pose;$/;"	m	class:node
+position	node.hpp	/^typedef struct position {$/;"	s
+position	node.hpp	/^} position;$/;"	t	typeref:struct:position
+potential_fields	motion_control.cpp	/^vec potential_fields(int id, mat A, mat x, mat v, float r_max, float r_min) {$/;"	f
+pub_vel	node.hpp	/^    ros::Publisher pub_vel;$/;"	m	class:node
+r_com	file_utils.hpp	/^	arma::vec r_com;		\/\/ Maxium range of communication$/;"	m	struct:topology
+r_com	robot.hpp	/^    arma::vec r_com, r_sec;         \/\/ Communication and security radius$/;"	m	class:robot
+r_com	robot.hpp	/^    arma::vec r_com;                \/\/ The communication radius$/;"	m	struct:msg
+r_com_max	robot.hpp	/^    float r_com_max;                \/\/ Maximum communication radius$/;"	m	class:robot
+r_sec	file_utils.hpp	/^	arma::vec r_sec;		\/\/ Minimum range of security$/;"	m	struct:topology
+r_sec	robot.hpp	/^    arma::vec r_com, r_sec;         \/\/ Communication and security radius$/;"	m	class:robot
+r_sec	robot.hpp	/^    arma::vec r_sec;                \/\/ The security radius$/;"	m	struct:msg
+reach_matrix	graph_utils.cpp	/^mat reach_matrix(mat A) {$/;"	f
+read_topology	file_utils.cpp	/^topology read_topology(string config_file) {$/;"	f
+receding_horizon	motion_control.cpp	/^vec receding_horizon(unsigned int id, mat A, mat x, rowvec x_r, mat v, float dt, vec r_sec, vec r_com, bool sec_c, bool com_c) {$/;"	f
+receive	robot.cpp	/^void robot::receive(msg m) {$/;"	f	class:robot
+receive_ref	robot.cpp	/^void robot::receive_ref(rowvec x_r) {$/;"	f	class:robot
+ref_pass	file_utils.hpp	/^	bool ref_pass;			\/\/ Reference passage between neighbors$/;"	m	struct:topology
+ref_pass	robot.hpp	/^    bool ref_pass;                  \/\/ Reference passage option$/;"	m	class:robot
+ref_pass	robot.hpp	/^    bool ref_pass;                  \/\/ Reference passage option$/;"	m	struct:msg
+resize	utils.hpp	/^template <typename T> void resize(QuadProgPP::Matrix<T> &in, const unsigned int n, const unsigned int m) {$/;"	f
+resize	utils.hpp	/^template <typename T> void resize(QuadProgPP::Vector<T> &in, const unsigned int n) {$/;"	f
+robot	robot.cpp	/^robot::robot() {$/;"	f	class:robot
+robot	robot.hpp	/^class robot {$/;"	c
+roll	node.hpp	/^    double roll;    \/\/ lateral axis (X)$/;"	m	struct:position
+roll	node.hpp	/^    double roll;    \/\/ lateral axis angular velocity$/;"	m	struct:velocity
+ros_interface	ros_interface.hpp	/^class ros_interface {$/;"	c
+sec_c	file_utils.hpp	/^	bool sec_c;				\/\/ Security radius constraint$/;"	m	struct:topology
+show_constraints	k_optimization.cpp	/^void show_constraints(GRBLinExpr *lhsExprs, char *senses, double *rhsVals, string *names, unsigned int xn) {$/;"	f
+show_matrix	utils.cpp	/^void show_matrix(const Matrix<double> mat) {$/;"	f
+show_var	k_optimization.cpp	/^void show_var(GRBVar *vars, unsigned int size) {$/;"	f
+show_vector	utils.cpp	/^void show_vector(const Vector<double> vec) {$/;"	f
+sub_pose	node.hpp	/^    ros::Subscriber sub_pose;$/;"	m	class:node
+subgraph	graph_utils.cpp	/^void subgraph(umat &S, mat A, unsigned int depth) {$/;"	f
+subgraph	graph_utils.cpp	/^void subgraph(umat &S, vector<int> sg, mat A, uvec N, unsigned int depth, int &id_s, int id_sg) {$/;"	f
+time_index	robot.hpp	/^    arma::uvec time_index;$/;"	m	class:robot
+time_out	robot.hpp	/^    arma::uvec time_out;            \/\/ Dropped neighbors array$/;"	m	struct:msg
+time_out	robot.hpp	/^    arma::uvec time_out;            \/\/ Dropped neighbors$/;"	m	class:robot
+timeout	file_utils.hpp	/^	arma::vec timeout;		\/\/ Timeout configurations$/;"	m	struct:topology
+topology	file_utils.hpp	/^typedef struct topology {$/;"	s
+topology	file_utils.hpp	/^} topology;$/;"	t	typeref:struct:topology
+topology_control	robot.cpp	/^void robot::topology_control(const unsigned int iter) {$/;"	f	class:robot
+trimat	utils.hpp	/^template <typename T> QuadProgPP::Matrix<T> trimat(const T elem, const unsigned int ord, const unsigned int mode) {$/;"	f
+tsp_optimization	k_optimization.cpp	/^mat tsp_optimization(mat A) {$/;"	f
+type	node.hpp	/^    int type;$/;"	m	class:node
+v	robot.hpp	/^    arma::mat v;                    \/\/ The velocities for the robot and its neighbors$/;"	m	struct:msg
+v	robot.hpp	/^    arma::mat x, v;                 \/\/ Position and velocity matrices$/;"	m	class:robot
+v_links	robot.hpp	/^    std::vector<vlink> v_links;     \/\/The virtual link nodes$/;"	m	struct:msg
+v_links	robot.hpp	/^    std::vector<vlink> v_links;$/;"	m	struct:cnode
+vel	node.hpp	/^    velocity vel;$/;"	m	class:node
+velocity	node.hpp	/^typedef struct velocity {$/;"	s
+velocity	node.hpp	/^} velocity;$/;"	t	typeref:struct:velocity
+verify_cnode	robot.cpp	/^bool robot::verify_cnode(unsigned int id, int &index_cnode) {$/;"	f	class:robot
+verify_vlink	robot.cpp	/^bool robot::verify_vlink(unsigned int id, std::vector<vlink> v_links, int &index_vlink) {$/;"	f	class:robot
+verify_vlink	robot.cpp	/^bool robot::verify_vlink(unsigned int id, vlink v_link, int &index_vlink, int &index_cnode) {$/;"	f	class:robot
+virtual_neighbors	robot.cpp	/^uvec robot::virtual_neighbors(uvec N_p) {$/;"	f	class:robot
+vlink	robot.hpp	/^typedef struct vlink {$/;"	s
+vlink	robot.hpp	/^} vlink;$/;"	t	typeref:struct:vlink
+w	k_optimization.hpp	/^	double w;		\/\/ weight of edge$/;"	m	struct:edge
+w_jk	robot.hpp	/^    float w_jk;$/;"	m	struct:vlink
+write_matfile	file_utils.cpp	/^void write_matfile(cube A_data, mat x_data, mat v_data, mat rmax_data, mat rmin_data, mat ref_data, int N_iter) {$/;"	f
+x	node.hpp	/^    double x;       \/\/ position in x$/;"	m	struct:position
+x	node.hpp	/^    double x;       \/\/ velocity in x$/;"	m	struct:velocity
+x	robot.hpp	/^    arma::mat x, v;                 \/\/ Position and velocity matrices$/;"	m	class:robot
+x	robot.hpp	/^    arma::mat x;                    \/\/ Contains the positions for the robot and its neighbors$/;"	m	struct:msg
+x_r	robot.hpp	/^    arma::rowvec x_r;               \/\/ The reference for consensus$/;"	m	struct:msg
+x_r	robot.hpp	/^    arma::rowvec x_r;               \/\/ The reference$/;"	m	class:robot
+x_ref	file_utils.hpp	/^	arma::mat x_ref;		\/\/ Reference position$/;"	m	struct:topology
+y	node.hpp	/^    double y;       \/\/ position in y$/;"	m	struct:position
+y	node.hpp	/^    double y;       \/\/ velocity in y$/;"	m	struct:velocity
+yaw	node.hpp	/^    double yaw;     \/\/ vertical axis (Z)$/;"	m	struct:position
+yaw	node.hpp	/^    double yaw;     \/\/ vertical axis angular velocity$/;"	m	struct:velocity
+z	node.hpp	/^    double z;       \/\/ position in z$/;"	m	struct:position
+z	node.hpp	/^    double z;       \/\/ velocity in z$/;"	m	struct:velocity
+~MatFile	MatFile.cpp	/^MatFile::~MatFile()$/;"	f	class:MatFile
+~robot	robot.cpp	/^robot::~robot() {$/;"	f	class:robot
