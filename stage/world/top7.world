@@ -1,0 +1,191 @@
+# top7.world - stage input for top7.conf file
+# Author: Sidney RDC
+# Last Change: 2015 Mar 28 18:04:45
+
+include "pioneer.inc"
+include "map.inc"
+include "sick.inc"
+
+# configure the GUI window
+window
+(
+    size [ 745.0 448.0 ]          # in pixels
+    scale 12.806                  # pixels per meter
+    center [ 20.0  20.0 ]
+    rotate [ 0.0  0.0 ]
+
+    # GUI options
+    # 1=on 0=off
+    show_data 0
+    show_flags 1
+    show_blocks 1
+    show_clock 1
+    show_footprints 1
+    show_grid 1
+)
+
+# load an environment bitmap
+floorplan
+(
+    name "blank"
+    size [0.000 16.000 0.800]
+    pose [40.000 40.000 0.000 0.000]
+    bitmap "blank.png"
+)
+
+# set the resolution of the underlying raytrace model in meters
+resolution 0.02
+
+# simulation timestep in milliseconds
+interval_sim 100
+
+# robot 0
+fancypioneer2dx
+(
+    # can refer to the robot by this name
+    name "r0"
+    pose [ 10.15274 30.95245 0.0 0.0 ]
+
+    # pioneer2dx's sonars	will be ranger:0 and the laser will be ranger:1
+    fancysicklaser( pose [ 0.000 0.000 0.000 0.000 ] )
+
+    # report error-free position in world coordinates
+    #localization "gps"
+    #localization_origin [ 0 0 0 0 ]
+)
+
+# robot 1
+fancypioneer2dx
+(
+    # can refer to the robot by this name
+    name "r1"
+    pose [ 21.66065 12.06092 0.0 0.0 ]
+
+    # pioneer2dx's sonars	will be ranger:0 and the laser will be ranger:1
+    fancysicklaser( pose [ 0.000 0.000 0.000 0.000 ] )
+
+    # report error-free position in world coordinates
+    #localization "gps"
+    #localization_origin [ 0 0 0 0 ]
+)
+
+# robot 2
+fancypioneer2dx
+(
+    # can refer to the robot by this name
+    name "r2"
+    pose [ 08.41353 21.87477 0.0 0.0 ]
+
+    # pioneer2dx's sonars	will be ranger:0 and the laser will be ranger:1
+    fancysicklaser( pose [ 0.000 0.000 0.000 0.000 ] )
+
+    # report error-free position in world coordinates
+    #localization "gps"
+    #localization_origin [ 0 0 0 0 ]
+)
+
+# robot 3
+fancypioneer2dx
+(
+    # can refer to the robot by this name
+    name "r3"
+    pose [ 27.24059 12.54211 0.0 0.0 ]
+
+    # pioneer2dx's sonars	will be ranger:0 and the laser will be ranger:1
+    fancysicklaser( pose [ 0.000 0.000 0.000 0.000 ] )
+
+    # report error-free position in world coordinates
+    #localization "gps"
+    #localization_origin [ 0 0 0 0 ]
+)
+
+# robot 4
+fancypioneer2dx
+(
+    # can refer to the robot by this name
+    name "r4"
+    pose [ 19.98972 22.43757 0.0 0.0 ]
+
+    # pioneer2dx's sonars	will be ranger:0 and the laser will be ranger:1
+    fancysicklaser( pose [ 0.000 0.000 0.000 0.000 ] )
+
+    # report error-free position in world coordinates
+    #localization "gps"
+    #localization_origin [ 0 0 0 0 ]
+)
+
+# robot 5
+fancypioneer2dx
+(
+    # can refer to the robot by this name
+    name "r5"
+    pose [ 20.41575 32.64613 0.0 0.0 ]
+
+    # pioneer2dx's sonars	will be ranger:0 and the laser will be ranger:1
+    fancysicklaser( pose [ 0.000 0.000 0.000 0.000 ] )
+
+    # report error-free position in world coordinates
+    #localization "gps"
+    #localization_origin [ 0 0 0 0 ]
+)
+
+# robot 6
+fancypioneer2dx
+(
+    # can refer to the robot by this name
+    name "r6"
+    pose [ 24.90148 18.76049 0.0 0.0 ]
+
+    # pioneer2dx's sonars	will be ranger:0 and the laser will be ranger:1
+    fancysicklaser( pose [ 0.000 0.000 0.000 0.000 ] )
+
+    # report error-free position in world coordinates
+    #localization "gps"
+    #localization_origin [ 0 0 0 0 ]
+)
+
+# robot 7
+fancypioneer2dx
+(
+    # can refer to the robot by this name
+    name "r7"
+    pose [ 15.37040 23.61741 0.0 0.0 ]
+
+    # pioneer2dx's sonars	will be ranger:0 and the laser will be ranger:1
+    fancysicklaser( pose [ 0.000 0.000 0.000 0.000 ] )
+
+    # report error-free position in world coordinates
+    #localization "gps"
+    #localization_origin [ 0 0 0 0 ]
+)
+
+# robot 8
+fancypioneer2dx
+(
+    # can refer to the robot by this name
+    name "r8"
+    pose [ 24.96052 39.97590 0.0 0.0 ]
+
+    # pioneer2dx's sonars	will be ranger:0 and the laser will be ranger:1
+    fancysicklaser( pose [ 0.000 0.000 0.000 0.000 ] )
+
+    # report error-free position in world coordinates
+    #localization "gps"
+    #localization_origin [ 0 0 0 0 ]
+)
+
+# robot 9
+fancypioneer2dx
+(
+    # can refer to the robot by this name
+    name "r9"
+    pose [ 18.95814 32.75446 0.0 0.0 ]
+
+    # pioneer2dx's sonars	will be ranger:0 and the laser will be ranger:1
+    fancysicklaser( pose [ 0.000 0.000 0.000 0.000 ] )
+
+    # report error-free position in world coordinates
+    #localization "gps"
+    #localization_origin [ 0 0 0 0 ]
+)
+

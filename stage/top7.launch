@@ -1,0 +1,12 @@
+<launch>
+    <!-- stage -->
+    <remap from="/robot_5/cmd_vel" to="/p3dx/cmd_vel"/>
+    <remap from="/robot_9/cmd_vel" to="/p3at/cmd_vel"/>
+    <node
+        pkg="stage_ros"
+        type="stageros"
+        name="stage_node"
+        args="/home/sidney/Arquivos/Docs/UFSC/MASTER/Code/topology_control/stage/world/top7.world"
+    />
+</launch>
+

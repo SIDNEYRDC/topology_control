@@ -1,0 +1,10 @@
+<launch>
+    <!-- stage -->
+    <node
+        pkg="stage_ros"
+        type="stageros"
+        name="stage_node"
+        args="/home/sidney/Arquivos/Docs/UFSC/MASTER/Code/topology_control/stage/world/top4.world"
+    />
+</launch>
+
