@@ -51,7 +51,7 @@ end
 
 figure;
 plot([1:1:N],xi(1:N));
-% axis([0 250 0 12500]);
+% axis([0 100 0 11]);
 grid on;
 
 % Set default font and interpreter

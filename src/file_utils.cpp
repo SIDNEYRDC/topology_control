@@ -1,7 +1,7 @@
 /**********************************************************************
 *   Tools for access and process file of the type .mat and .conf
 *   Written by Sidney RDC, 2014.
-*   Last Change: 2015 Abr 12 02:23:46
+*   Last Change: 2015 Mai 27 17:57:15
 ***********************************************************************/
 
 #include "file_utils.hpp"
