@@ -13,7 +13,7 @@ LINE_WIDTH = 1;
 % 1: save .pdf
 % 2: save .eps
 % 3: save .avi
-SAVE_OPTIONS = 1;
+SAVE_OPTIONS = 0;
 
 % Time of each iteration
 LOOP_TIME = 0;
@@ -48,7 +48,7 @@ if SAVE_OPTIONS == 3
 end
 
 % Position for robots
-for t = 50% : 10 : N
+for t = 1 : 1 : N
     newplot;
     hold on;
     
@@ -157,7 +157,7 @@ for t = 50% : 10 : N
 %         text(x_plot(t,agent-1),x_plot(t,agent),str);
     end
 %     grid on;
-    axis([-10 90 -10 90]);
+%     axis([-10 90 -10 90]);
     set(gca,'FontName','Helvetica');
     xlabel('x [m]');
     ylabel('y [m]');

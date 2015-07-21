@@ -21,8 +21,8 @@ nnoremap ,p "+p
 map cp :cp
 map cn :cn
 nmap gx <Plug>NetrwBrowseX
-nnoremap <F8> :call conque_term#set_mappings("toggle")
 nnoremap <silent> <F10> :call conque_term#send_file()
+nnoremap <F8> :call conque_term#set_mappings("toggle")
 nnoremap <silent> <Plug>NetrwBrowseX :call netrw#NetrwBrowseX(expand("<cWORD>"),0)
 nnoremap <silent> <F11> :call conque_term#exec_file()
 map <C-Tab><Right> :tabn
@@ -48,6 +48,7 @@ set helplang=en
 set history=100
 set hlsearch
 set ignorecase
+set iminsert=0
 set incsearch
 set listchars=trail:·,tab:»·,nbsp:·
 set mouse=a
@@ -69,16 +70,18 @@ set window=45
 let s:so_save = &so | let s:siso_save = &siso | set so=0 siso=0
 let v:this_session=expand("<sfile>:p")
 silent only
-cd ~/Documents/MASTER/Code/topology_control/src
+cd ~/Documents/MASTER/Code/topology_control/conf
 if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
+badd +1 ~/Documents/MASTER/Code/topology_control/topology_control.session
 badd +13 ~/Documents/MASTER/Code/topology_control/src/main.cpp
-badd +10 ~/Documents/MASTER/Code/topology_control/src/makefile
+badd +8 ~/Documents/MASTER/Code/topology_control/src/makefile
 badd +0 ~/Documents/MASTER/Code/topology_control/src/bash\ -\ 1
-args main.cpp
-edit ~/Documents/MASTER/Code/topology_control/src/makefile
+badd +0 ~/Documents/MASTER/Code/topology_control/conf/top5.conf
+args ~/Documents/MASTER/Code/topology_control/src/main.cpp
+edit ~/Documents/MASTER/Code/topology_control/conf/top5.conf
 set splitbelow splitright
 wincmd _ | wincmd |
 split
@@ -131,7 +134,7 @@ setlocal cinoptions=
 setlocal cinwords=if,else,while,do,for,switch
 set colorcolumn=80
 setlocal colorcolumn=80
-setlocal comments=sO:#\ -,mO:#\ \ ,b:#
+setlocal comments=:#
 setlocal commentstring=#\ %s
 setlocal complete=.,w,b,u,t,i
 setlocal concealcursor=
@@ -147,9 +150,9 @@ setlocal dictionary=
 setlocal nodiff
 setlocal equalprg=
 setlocal errorformat=
-setlocal noexpandtab
-if &filetype != 'make'
-setlocal filetype=make
+setlocal expandtab
+if &filetype != 'conf'
+setlocal filetype=conf
 endif
 setlocal foldcolumn=0
 setlocal foldenable
@@ -166,12 +169,12 @@ setlocal formatexpr=
 setlocal formatoptions=croql
 setlocal formatlistpat=^\\s*\\d\\+[\\]:.)}\\t\ ]\\s*
 setlocal grepprg=
-setlocal iminsert=2
+setlocal iminsert=0
 setlocal imsearch=2
-setlocal include=^\\s*include
+setlocal include=
 setlocal includeexpr=
-setlocal indentexpr=GetMakeIndent()
-setlocal indentkeys=!^F,o,O,<:>,=else,=endif
+setlocal indentexpr=
+setlocal indentkeys=0{,0},:,0#,!^F,o,O,e
 setlocal noinfercase
 setlocal iskeyword=@,48-57,_,192-255
 setlocal keywordprg=
@@ -200,7 +203,7 @@ setlocal noscrollbind
 setlocal shiftwidth=4
 setlocal noshortname
 setlocal nosmartindent
-setlocal softtabstop=0
+setlocal softtabstop=4
 setlocal nospell
 setlocal spellcapcheck=[.?!]\\_[\\])'\"\	\ ]\\+
 setlocal spellfile=
@@ -209,8 +212,8 @@ setlocal statusline=
 setlocal suffixesadd=
 setlocal swapfile
 setlocal synmaxcol=3000
-if &syntax != 'make'
-setlocal syntax=make
+if &syntax != 'conf'
+setlocal syntax=conf
 endif
 setlocal tabstop=4
 setlocal tags=
@@ -221,35 +224,35 @@ setlocal nowinfixheight
 setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
-let s:l = 19 - ((0 * winheight(0) + 10) / 21)
+let s:l = 19 - ((18 * winheight(0) + 10) / 21)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 19
-normal! 028|
+normal! 021|
 wincmd w
 argglobal
 enew
 file ~/Documents/MASTER/Code/topology_control/src/bash\ -\ 1
 let s:cpo_save=&cpo
 set cpo&vim
-inoremap <buffer> <S-Help> :py ConqueTerm_1.write_expr("@+")a
-inoremap <buffer> <S-Insert> :py ConqueTerm_1.write_expr("@+")a
-inoremap <buffer> <silent> <End> :py ConqueTerm_1.write(u("\x1bOF"))
-inoremap <buffer> <silent> <Home> :py ConqueTerm_1.write(u("\x1bOH"))
-inoremap <buffer> <silent> <Left> :py ConqueTerm_1.write(u("\x1b[D"))
-inoremap <buffer> <silent> <Right> :py ConqueTerm_1.write(u("\x1b[C"))
-inoremap <buffer> <silent> <Down> :py ConqueTerm_1.write(u("\x1b[B"))
-inoremap <buffer> <silent> <Up> :py ConqueTerm_1.write(u("\x1b[A"))
-inoremap <buffer> <silent> <S-Space> :py ConqueTerm_1.write(u(" "))
-inoremap <buffer> <silent> <S-BS> :py ConqueTerm_1.write(u("\x08"))
 inoremap <buffer> <silent> <BS> :py ConqueTerm_1.write(u("\x08"))
+inoremap <buffer> <silent> <S-BS> :py ConqueTerm_1.write(u("\x08"))
+inoremap <buffer> <silent> <S-Space> :py ConqueTerm_1.write(u(" "))
+inoremap <buffer> <silent> <Up> :py ConqueTerm_1.write(u("\x1b[A"))
+inoremap <buffer> <silent> <Down> :py ConqueTerm_1.write(u("\x1b[B"))
+inoremap <buffer> <silent> <Right> :py ConqueTerm_1.write(u("\x1b[C"))
+inoremap <buffer> <silent> <Left> :py ConqueTerm_1.write(u("\x1b[D"))
+inoremap <buffer> <silent> <Home> :py ConqueTerm_1.write(u("\x1bOH"))
+inoremap <buffer> <silent> <End> :py ConqueTerm_1.write(u("\x1bOF"))
+inoremap <buffer> <S-Insert> :py ConqueTerm_1.write_expr("@+")a
+inoremap <buffer> <S-Help> :py ConqueTerm_1.write_expr("@+")a
 nnoremap <buffer> <silent>  :py ConqueTerm_1.write_ord(3)
-nnoremap <buffer> <silent> C :echo "Change mode disabled in shell."
-inoremap <buffer> <silent> î :call AutoPairsJump()a
-inoremap <buffer> <silent> <expr> ð AutoPairsToggle()
-inoremap <buffer> <silent> â =AutoPairsBackInsert()
 inoremap <buffer> <silent> å =AutoPairsFastWrap()
+inoremap <buffer> <silent> â =AutoPairsBackInsert()
+inoremap <buffer> <silent> <expr> ð AutoPairsToggle()
+inoremap <buffer> <silent> î :call AutoPairsJump()a
+nnoremap <buffer> <silent> C :echo "Change mode disabled in shell."
 nnoremap <buffer> <silent> P :py ConqueTerm_1.write_expr("@@")a
 nnoremap <buffer> <silent> R :echo "Replace mode disabled in shell."
 nnoremap <buffer> <silent> S :echo "Change mode disabled in shell."
@@ -325,9 +328,9 @@ inoremap <buffer> <silent> ? :py ConqueTerm_1.write_ord(63)
 inoremap <buffer> <silent> @ :py ConqueTerm_1.write_ord(64)
 inoremap <buffer> <silent> A :py ConqueTerm_1.write_ord(65)
 inoremap <buffer> <silent> B :py ConqueTerm_1.write_ord(66)
-inoremap <buffer> <silent> C :py ConqueTerm_1.write_ord(67)
-noremap <buffer> <silent> î :call AutoPairsJump()
 noremap <buffer> <silent> ð :call AutoPairsToggle()
+noremap <buffer> <silent> î :call AutoPairsJump()
+inoremap <buffer> <silent> C :py ConqueTerm_1.write_ord(67)
 inoremap <buffer> <silent> D :py ConqueTerm_1.write_ord(68)
 inoremap <buffer> <silent> E :py ConqueTerm_1.write_ord(69)
 inoremap <buffer> <silent> F :py ConqueTerm_1.write_ord(70)
@@ -499,7 +502,6 @@ setlocal nowinfixwidth
 setlocal nowrap
 setlocal wrapmargin=0
 wincmd w
-2wincmd w
 exe '1resize ' . ((&lines * 21 + 23) / 46)
 exe '2resize ' . ((&lines * 22 + 23) / 46)
 tabnext 1
