@@ -4,7 +4,7 @@
         pkg="stage_ros"
         type="stageros"
         name="stage_node"
-        args="/home/sidney/Arquivos/Docs/UFSC/MASTER/Code/topology_control/stage/world/top4.world"
+        args="/home/sidney/Documents/MASTER/code/topology_control/stage/world/top4.world"
     />
 </launch>
 

@@ -1,4 +1,4 @@
-%% Plot the final position for robots %%
+em%% Plot the final position for robots %%
 
 % Vector of colors for each robots
 colors = {'b','g','r','c','m','k','y','b','g','r','c','m','y','k','b','g','r','c','m','y','k'};

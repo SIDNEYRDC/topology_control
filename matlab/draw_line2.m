@@ -55,7 +55,7 @@ function draw_line2(p1, p2, varargin)
 % email: sydney_rdc@hotmail.com
 % -------------------------------------------------------------------------
 %% check the given points are column format
-clc;
+
 % p1 = [ 45 56]';
 % p2 = [ 3 67]';
 
@@ -98,7 +98,7 @@ values.LineWidth        = 5;
 values.ArrowDirection   = 1;
 values.ArrowLength      = 3;
 values.ArrowIntend      = 0.1;
-values.ArrowAngle       = 15;
+values.ArrowAngle       = 7;
 values.ArrowColor       = 'r';
 values.ArrowEdgeColor   = 'k';
 
