@@ -13,7 +13,7 @@ LINE_WIDTH = 1;
 % 1: save .pdf
 % 2: save .eps
 % 3: save .avi
-SAVE_OPTIONS = 0;
+SAVE_OPTIONS = 3;
 
 % Time of each iteration
 LOOP_TIME = 0;
@@ -48,7 +48,7 @@ if SAVE_OPTIONS == 3
 end
 
 % Position for robots
-for t = 1 : N
+for t = 1 : 300%[120 160 190 220 300] %1 : N
     newplot;
     hold on;
     
@@ -165,7 +165,40 @@ for t = 1 : N
         end
     end
 %     grid on;
-    axis([-8 27 -10 27]);
+
+    slack = 1;
+    xmin = min(min(x_plot(:,1:2:end)));
+    xmax = max(max(x_plot(:,1:2:end)));
+    ymin = min(min(x_plot(:,2:2:end)));
+    ymax = max(max(x_plot(:,2:2:end)));
+        
+    if xmin < 0 && xmax < 0
+        xmax = xmax - slack;
+        xmin = xmin - slack;
+    elseif xmin < 0 && xmax > 0
+        xmax = xmax + slack;
+        xmin = xmin - slack;
+    elseif xmin > 0 && xmax > 0
+        xmax = xmax + slack;
+        xmin = xmin + slack;
+    end
+    
+    if ymin < 0 && ymax < 0
+        ymax = ymax - slack;
+        ymin = ymin - slack;
+    elseif ymin < 0 && ymax > 0
+        ymax = ymax + slack;
+        ymin = ymin - slack;
+    elseif ymin > 0 && ymax > 0
+        ymax = ymax + slack;
+        ymin = ymin + slack;
+    end
+    
+    xlimit = [xmin xmax];
+    ylimit = [ymin ymax];
+    
+%     axis([-6 27 -10 20]);
+    axis([xlimit ylimit]);
     set(gca,'FontName','Helvetica');
     xlabel('x [m]');
     ylabel('y [m]');
