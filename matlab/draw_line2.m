@@ -98,7 +98,7 @@ values.LineWidth        = 5;
 values.ArrowDirection   = 1;
 values.ArrowLength      = 3;
 values.ArrowIntend      = 0.1;
-values.ArrowAngle       = 7;
+values.ArrowAngle       = 10;
 values.ArrowColor       = 'r';
 values.ArrowEdgeColor   = 'k';
 
