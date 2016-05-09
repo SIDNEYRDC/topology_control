@@ -7,8 +7,8 @@
 # > bt
 
 if [ "$1" == "" ]; then
-	echo "Usage: ./run.sh topology.conf"
+    echo "Usage: ./run.sh topology.conf"
 else
-	../bin/main ../conf/$1
+    ../bin/main ../conf/$1
 fi
 
