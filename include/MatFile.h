@@ -1,3 +1,15 @@
+/**********************************************************************
+*   Class for writing matlab's .mat files. These are HDF5 files with
+*   a simple (and pointless) header.
+*
+*   Written by Tim, 2010.
+*   Maintained by Sidney Carvalho, 2016.
+*   Last Change: 2016 Mai 23 15:01:45
+*
+*   Currently only matrix (2D and 3D) and vector variables are supported.
+*   TODO: cell arrays would be nice.
+***********************************************************************/
+
 #ifndef MATFILE_H
 #define MATFILE_H
 
@@ -6,13 +18,11 @@
 
 #include <string>
 
-// Class for writing matlab's .mat files. These are HDF5 files with a simple (and pointless) header.
-// Currently only simple matrix and vector variables are supported. TODO: cell arrays would be nice.
-class MatFile
-{
+class MatFile {
 public:
     // Create an unopened mat file. Use Open after this.
     MatFile();
+
     // Create and open a mat file.
     explicit MatFile(const std::string& fn);
 
@@ -41,13 +51,11 @@ public:
     bool WriteVector(const std::string& varname, int nx, const double* data);
 
     // Convenience function.
-    bool WriteValue(const std::string& varname, double v)
-    {
+    bool WriteValue(const std::string& varname, double v) {
         return WriteVector(varname, 1, &v);
     }
 
 private:
-
     // No copy.
     MatFile(const MatFile&);
     const MatFile& operator=(const MatFile&);
