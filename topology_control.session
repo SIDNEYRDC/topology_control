@@ -48,6 +48,10 @@ nnoremap ,p "+p
 map cp :cp
 map cn :cn
 nmap gx <Plug>NetrwBrowseX
+map <C-Tab><Up> :tabr
+map <C-Tab><Down> :tabl
+map <C-Tab><Left> :tabp
+map <C-Tab><Right> :tabn
 nnoremap <silent> <Plug>NetrwBrowseX :call netrw#NetrwBrowseX(expand("<cWORD>"),0)
 nmap <silent> <Plug>NERDCommenterAppend :call NERDComment(0, "append")
 nnoremap <silent> <Plug>NERDCommenterToEOL :call NERDComment(0, "toEOL")
@@ -72,10 +76,18 @@ nnoremap <silent> <Plug>NERDCommenterToggle :call NERDComment(0, "toggle")
 vnoremap <silent> <Plug>NERDCommenterComment :call NERDComment(1, "norm")
 nnoremap <silent> <Plug>NERDCommenterComment :call NERDComment(0, "norm")
 nnoremap <silent> <F11> :call conque_term#exec_file()
-map <C-Tab><Right> :tabn
-map <C-Tab><Left> :tabp
-map <C-Tab><Down> :tabl
-map <C-Tab><Up> :tabr
+nmap <silent> <C-Right> :wincmd l
+nmap <silent> <C-Left> :wincmd h
+nmap <silent> <C-Down> :wincmd j
+nmap <silent> <C-Up> :wincmd k
+vmap <C-Right> :tabr
+omap <C-Right> :tabr
+vmap <C-Left> :tabl
+omap <C-Left> :tabl
+vmap <C-Down> :tabn
+omap <C-Down> :tabn
+vmap <C-Up> :tabp
+omap <C-Up> :tabp
 map <C-F8> :copen
 map <C-F9> :make clean
 map <F9> :make
@@ -137,18 +149,18 @@ argglobal
 let s:cpo_save=&cpo
 set cpo&vim
 inoremap <buffer> <silent> <BS> =AutoPairsDelete()
-inoremap <buffer> <silent> å =AutoPairsFastWrap()
-inoremap <buffer> <silent> â =AutoPairsBackInsert()
-inoremap <buffer> <silent> <expr> ð AutoPairsToggle()
 inoremap <buffer> <silent> î :call AutoPairsJump()a
+inoremap <buffer> <silent> <expr> ð AutoPairsToggle()
+inoremap <buffer> <silent> â =AutoPairsBackInsert()
+inoremap <buffer> <silent> å =AutoPairsFastWrap()
 inoremap <buffer> <silent>  =AutoPairsDelete()
 inoremap <buffer> <silent>   =AutoPairsSpace()
 inoremap <buffer> <silent> " =AutoPairsInsert('"')
 inoremap <buffer> <silent> ' =AutoPairsInsert('''')
 inoremap <buffer> <silent> ( =AutoPairsInsert('(')
 inoremap <buffer> <silent> ) =AutoPairsInsert(')')
-noremap <buffer> <silent> ð :call AutoPairsToggle()
 noremap <buffer> <silent> î :call AutoPairsJump()
+noremap <buffer> <silent> ð :call AutoPairsToggle()
 inoremap <buffer> <silent> [ =AutoPairsInsert('[')
 inoremap <buffer> <silent> ] =AutoPairsInsert(']')
 inoremap <buffer> <silent> ` =AutoPairsInsert('`')
@@ -264,11 +276,11 @@ setlocal nowinfixheight
 setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
-let s:l = 334 - ((48 * winheight(0) + 24) / 49)
+let s:l = 177 - ((47 * winheight(0) + 24) / 49)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-334
+177
 normal! 0
 tabnext 1
 if exists('s:wipebuf')

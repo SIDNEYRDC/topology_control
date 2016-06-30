@@ -2,7 +2,7 @@
  = Control Module to Topology Control Algorithm in Julia
  =
  = Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
- = Last Change: 2016 Jun 11 16:17:58
+ = Last Change: 2016 Jun 29 19:46:23
  = Info: This file contains the motion control algorithms used in the topology
  = control algorithm.
  =============================================================================#
@@ -53,21 +53,13 @@ function hl_motion_control(i, A, H, D, S, T, TI, n_bot, n_ref, x, v, r_com, r_co
     for j in N2
         # auxiliary matrices definition
         Vj = repmat(v[j, :], p, 1)
+        Sij = fill(10*phi*log(r_cov[i] + r_cov[j]) - abs(S[j]), p, 1)
 
         # enable RSSI sensing
         RSSI_SENS == 1 ? dij = 10^(S[j]/(-10*phi)) : dij = D[i, j]
 
         # calculate the desired position to x and y coordinates
         dxy = (x[i, 1 : 2] - x[j, 1 : 2])*(r_cov[i] + r_cov[j])/dij + x[j, 1 : 2]
-
-        #=println("i:$(i) j:$(j) Dij:$(D[i, j]) Sij:$(S[i, j]) dij:$(exp(-S[i, j]/(10*phi)))")=#
-
-        #dx = x[i, 1] - x[j, 1]
-        #dx != 0 ? dtheta = atan((x[i, 2] - x[j, 2])/dx) : dtheta = 0
-
-        Sij = fill(10*phi*log(r_cov[i] + r_cov[j]) - abs(S[j]), p, 1)
-
-        #=println("i:$(i)   sijd:$(10*phi*log(r_cov[i] + r_cov[j]))    sij:$(S[j])")=#
 
         # auxiliary matrix to desired position
         Xd = repmat([dxy dtheta], p, 1)
@@ -78,7 +70,7 @@ function hl_motion_control(i, A, H, D, S, T, TI, n_bot, n_ref, x, v, r_com, r_co
 
         # fill auxiliary matrices
         Hixy = Hixy + T'*h*h*psi_ij*gamma[1]*T + phi_ij*gamma[2] + (psi_ij - H[i, j])*gamma[3] + T'*h*h*psi_ij*gamma[7]*T
-        Hitheta =  Hitheta + T'*h*h*psi_ij*gamma[1]*T
+        Hitheta = Hitheta + T'*h*h*psi_ij*gamma[1]*T
         fix = fix + (Xi[:, 1] - Xd[:, 1])'*h*psi_ij*gamma[1]*T + Vj[:, 1]'*phi_ij*gamma[2] - Vj[:, 1]'*(psi_ij - H[i, j])*gamma[3] - Sij'*h*psi_ij*gamma[7]*T
         fiy = fiy + (Xi[:, 2] - Xd[:, 2])'*h*psi_ij*gamma[1]*T + Vj[:, 2]'*phi_ij*gamma[2] - Vj[:, 2]'*(psi_ij - H[i, j])*gamma[3] - Sij'*h*psi_ij*gamma[7]*T
         fitheta = fitheta + (Xi[:, 3] - Xd[:, 3])'*h*psi_ij*gamma[1]*T

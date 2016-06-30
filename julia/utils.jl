@@ -2,7 +2,7 @@
  = Extra functions to Topology Control simulator in Julia
  =
  = Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
- = Last Change: 2016 Mai 30 15:47:26
+ = Last Change: 2016 Jun 27 14:59:31
  = Info: This file contains some extra functions necessary to Topology Control
  = simulator main code.
  =============================================================================#
@@ -53,7 +53,7 @@ function neighbourhood(A, i, hop, N = zeros(UInt8, 1))
     for j in N_i
         # verify if the neighbour already is on the neighbourhood array
         if length(N[N .== j]) == 0
-            N = hcat(N, j)
+            N = vec(hcat(N', j))
         end
 
         # get recursively the deep neighbours
@@ -61,13 +61,6 @@ function neighbourhood(A, i, hop, N = zeros(UInt8, 1))
             N = neighbourhood(A, j, hop, N)
         end
     end
-
-    ## get recursively the deep neighbours
-    #if hop > 0
-        #for j in N_i
-           #N = neighbourhood(A, j, hop, N)
-        #end
-    #end
 
     return N
 end

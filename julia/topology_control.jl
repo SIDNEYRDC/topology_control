@@ -2,7 +2,7 @@
  = Topology Control Algorithm using Consensus and MPC
  =
  = Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
- = Last Change: 2016 Jun 11 15:26:33
+ = Last Change: 2016 Jun 29 19:53:23
  = Info: This code is able to adapts the network topology to RSSI variations
  = and adjust the angle between the robots to reach the best connectivity
  =============================================================================#
@@ -11,11 +11,13 @@
 include("opt.jl")               # tsp solution
 include("utils.jl")             # auxiliary functions
 include("control.jl")           # motion control algorithms
+include("network.jl")           # network interface
 
 # load external modules
 using MAT                       # to save .mat files
 using OPT                       # to use tsp solver
 using CONTROL                   # to use motion control algorithms
+using NETWORK                   # to use omnet++ interface
 
 #
 #=
@@ -24,6 +26,8 @@ using CONTROL                   # to use motion control algorithms
 
 include("conf1.jl")
 #=include("conf2.jl")=#
+
+#=println(ARGS[1])=#
 
 #
 #=
@@ -70,6 +74,9 @@ H = zeros(UInt8, n_bot, n_bot, n_iter)
 # constant matrices to motion control
 const T = tril(ones(Int8, p, p))
 const TI = inv(T)
+
+# enable omnet++ interface
+OMNET == 1 ? omnet_interface_init(n_bot) : 0
 
 # start timer counter
 tic()
@@ -121,6 +128,37 @@ for t = 1 : n_iter
         end
     end
 
+    # omnet++ package received indicator
+    omnet_rec = zeros(UInt8, n_bot)
+
+    # omnet++ communication loop
+    while OMNET == 1 && sum(omnet_rec) < n_bot
+        # wait for omnet++ data
+        in_msg = get_data()
+
+        # identify who robot receives omnet++ message with payload
+        in_msg.pay_size > 0 ? omnet_rec[in_msg.id] = 1 : 0
+
+        # 1-hop neighbourhood
+        N1 = find(A[in_msg.id, 1 : n_bot, t])
+
+        # 2-hop neighbourhood
+        N2 = neighbourhood(A[:, 1 : n_bot, t], in_msg.id, 2)
+
+        # build the output message
+        out_msg = MData(in_msg.id,
+                        length(N1),
+                        length(N2),
+                        N1, N2,
+                        x[N2, :, t],
+                        v[N2, :, t],
+                        x[:, 1 : 2, t],
+                        in_msg.sim_time, 0)
+
+        # send message to omnet++ interface
+        send_data(out_msg, "127.0.0.1", 50001 + in_msg.id)
+    end
+
     # control loop
     for i = 1 : n_bot
 
@@ -144,7 +182,19 @@ for t = 1 : n_iter
 
         if t != n_iter
             # high level motion control
-            v[i, :, t + 1], c[i, :, t + 1] = hl_motion_control(i, A[:, :, t], H[:, :, t], D[:, :, t], S[i, :, t], T, TI, n_bot, n_ref, x[:, :, t], v[:, :, t], r_com[:, t], r_cov[:, t], h, p, gamma, phi, RSSI_SENS, [vx_min vx_max], [va_min va_max]);
+            v[i, :, t + 1], c[i, :, t + 1] = hl_motion_control(i, A[:, :, t],
+                                                               H[:, :, t],
+                                                               D[:, :, t],
+                                                               S[i, :, t], T,
+                                                               TI, n_bot, n_ref,
+                                                               x[:, :, t],
+                                                               v[:, :, t],
+                                                               r_com[:, t],
+                                                               r_cov[:, t], h,
+                                                               p, gamma, phi,
+                                                               RSSI_SENS,
+                                                               [vx_min vx_max],
+                                                               [va_min va_max])
 
             # upgrade the position
             x[i, :, t + 1] = x[i, :, t] + v[i, :, t + 1]*h
@@ -163,9 +213,9 @@ toc()
  =#
 
 # create .mat file
-file = matopen(join(["sim", n_bot, n_iter, "mat"], "-", "."), "w")
+file = matopen(join(["../matlab/sim", n_bot, n_iter, "mat"], "-", "."), "w")
 
-# write data
+# write data into .mat file
 write(file, "N", n_iter)
 write(file, "n", n_bot)
 write(file, "nr", n_ref)

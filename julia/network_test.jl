@@ -20,50 +20,51 @@ x[12, :, 1] = [11 -5 0]
 
 omnet_interface_init(n_bot)
 
-out_data = cell(14)
+rec = zeros(UInt8, n_bot)
 
-#=while true=#
+#=for event = 1 : 1e4=#
+while sum(rec) < n_bot
     in_data = get_data()
-    println(in_data)
 
-    in_id = in_data[1]
-    in_omnet_time = in_data[2]
-
-    println("in_id:$(in_id) time:$(in_omnet_time)")
-
-    out_data[1] = in_id
-    out_data[2] = in_omnet_time
-
-    out_data[3] = zeros(Float32, n_bot, 2)
-
-    for i = 1 : n_bot
-        out_data[3][i, 1] = x[i, 1]
-        out_data[3][i, 2] = x[i, 2]
+    if in_data.pay_size > 0
+        println(in_data)
+        rec[in_data.id] = 1
+        println("rec:$(rec)")
     end
 
-    out_data[4] = 1
-    out_data[5] = 3
-    out_data[6] = 133
-    out_data[7] = 9
-    out_data[8] = 1
-    out_data[9] = 4
-    out_data[10] = [1; 2; 3; 5]
-    out_data[11] = 5
-    out_data[12] = [1; 2; 3; 5; 8]
+    in_id = in_data.id
+    in_omnet_time = in_data.sim_time
 
-    out_data[13] = zeros(Float32, length(out_data[12]), 3)
-    out_data[14] = zeros(Float32, length(out_data[12]), 3)
+    #=println("in_id:$(in_id) time:$(in_omnet_time)")=#
 
-    for i = 1 : length(out_data[12])
-        out_data[13][i, :] = x[out_data[12][i], :, 1]
-        out_data[14][i, :] = x[out_data[12][i], :, 1]
-    end
+    out_data = MData(0, 0, 0, [0, 0], [0, 0], [0 0], [0 0], [0 0], 0, 0)
 
-    send_data(out_data, "127.0.0.1", 50001+in_id)
+    out_data.id = in_id
+    out_data.sim_time = in_omnet_time
 
-    in_data = get_data()
-    println(in_data)
-    println("in_id:$(in_data[1]) time:$(in_data[2])")
+    out_data.sim_pose = x[:, 1:2, 1] #zeros(Float32, n_bot, 2)
 
-#=end=#
+    #=for i = 1 : n_bot=#
+        #=out_data.sim_pose[i, 1:2] = x[i, 1:2]=#
+    #=end=#
+
+    out_data.n1_size = 5
+    out_data.n1 = [1; 2; 3; 5; 8]
+    out_data.n2_size = n_bot
+    out_data.n2 = collect(1:n_bot)
+    #=out_data.x = zeros(Float32, out_data.n2_size, 3)=#
+    out_data.v = zeros(Float32, out_data.n2_size, 3)
+
+    out_data.x = x[:, :, 1]
+
+#=    for i = 1 : out_data.n2_size=#
+        #=out_data.x[i, :] = x[out_data.n2[i], :, 1]=#
+    #=end=#
+
+    send_data(out_data, "127.0.0.1", 50001 + in_id)
+
+    #=in_data = get_data()=#
+    #=println(in_data)=#
+    #=println("in_id:$(in_data[1]) time:$(in_data[2])")=#
+end
 

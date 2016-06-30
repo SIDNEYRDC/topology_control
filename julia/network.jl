@@ -1,8 +1,8 @@
 #==============================================================================
- = Network Module to Topology Control Algorithm in Julia
+ = Network Module for Topology Control Algorithm in Julia
  =
  = Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
- = Last Change: 2016 Jun 07 22:45:54
+ = Last Change: 2016 Jun 27 15:49:23
  = Info: This file contains the functions to access the network interface and
  = protocols by the Topology Control main algorithm.
  =============================================================================#
@@ -10,7 +10,7 @@
 module NETWORK
 
 # public functions
-export omnet_interface_init, get_data, send_data
+export omnet_interface_init, get_data, send_data, MData
 
 #
 #=
@@ -26,6 +26,26 @@ global const buffers_init       = current_time_init + 8
 global udps = UDPSocket()   # sender
 global udpr = UDPSocket()   # receiver
 
+# received message
+global msgr = zeros(UInt8, 1)
+
+# message reception indicator
+global received = false
+
+# message data type
+type MData
+    id::UInt8                   # sender id
+    n1_size::UInt8                  # 1-hop neighborhood size
+    n2_size::UInt8                  # 2-hop neighborhood size
+    n1::Array{UInt8, 1}             # 1-hop neighborhood
+    n2::Array{UInt8, 1}             # 2-hop neighborhood
+    x::Array{Float32, 2}            # state array
+    v::Array{Float32, 2}            # velocity array
+    sim_pose::Array{Float32, 2}     # position array to omnet++
+    sim_time::Float64               # simulation time
+    pay_size::UInt16                # payload size
+end
+
 #
 #=
  = Start Omnet++ interface
@@ -34,6 +54,14 @@ global udpr = UDPSocket()   # receiver
 function omnet_interface_init(n, ip = "127.0.0.1", port = 50001)
     # associates the udp socket with omnet++ transmission port
     bind(udpr, IPv4(ip), port)
+
+    # starts receiver thread
+    @async begin
+        while true
+            global msgr = recv(udpr)
+            global received = true
+        end
+    end
 
     # set the number of robots
     global n_bot = n
@@ -55,79 +83,78 @@ end
  = Info: allows the package reception from omnet++ (it is blocking) and extract
  = the data according with the RA-TDMA implementation by Oliveira et al. (2015)
  = found in: doi.org/10.1109/WFCS.2015.7160566
- = Use: data = get_data(), where data is a generic array from julia, defined as
- = follows: data[1] = sender id (UInt8)
- =          data[2] = current simulation time on omnet++ (Float64)
- =          data[3] = source message id (UInt8)
- =          data[4] = 1-hop neighborhood size (UInt8)
- =          data[5] = 1-hop neighborhood (Array{UInt8, 1, |N₁|})
- =          data[6] = 2-hop neighborhood size (UInt8)
- =          data[7] = 2-hop neighborhood (Array{UInt8, 1, |N₂|})
- =          data[8] = pose array (Array{Float32, |N₂|, 3})
- =          data[9] = velocity array (Array{Float32, |N₂|, 3})
+ = Use: data = get_data(), where data is a MData struct.
  =#
 function get_data()
-    # wait for data from omnet++
-    msg = recv(udpr)
+    # data output
+    data = MData(0, 0, 0, [0, 0], [0, 0], [0 0], [0 0], [0 0], 0, 0)
 
-    # generic data array
-    data = cell(8)
+    # wait for omnet++ data
+    while received == false
+        sleep(0.001)
+    end
+
+    # reset received status
+    global received = false
 
     # process the message package and extract the data
-    data[1] = msg[id_init]                                                      # sender id (1 Byte)
-    data[2] = bytes2num(msg[current_time_init + (0 : 7)])                       # actual simulation time in omnet++ (4 Bytes)
-    buffers = convert(Array{UInt32, 1}, msg[buffers_init + (0 : 4*n_bot - 1)])  # buffer state (4∙n Bytes)
-    payload_size = bytes2num(msg[size_init + (0 : 1)])                          # payload size (1 Byte)
-
-    println("--------------------------------------")
-    println(msg)
+    data.id = msgr[id_init]                                                # sender id (1 Byte)
+    data.sim_time = bytes2num(msgr[current_time_init + (0:7)])                 # actual simulation time in omnet++ (4 Bytes)
+    buffers = convert(Array{UInt32, 1}, msgr[buffers_init + (0:4*n_bot - 1)])  # buffer state (4∙n Bytes)
+    data.pay_size = bytes2num(msgr[size_init + (0:1)], UInt16)                 # payload size (2 Bytes)
 
     # if the payload size is greater than zero, gets the payload data
-    if payload_size > 0
+    if data.pay_size > 0
         # data indexes
-        global src_init         = payload_init + 0
-        global ptype_init       = src_init + 1
-        global n1_size_init     = ptype_init + 1
-        global n1_init          = n1_size_init + 1
+        n1_size_init     = payload_init + 0
+        n1_init          = n1_size_init + 1
 
-        data[3] = msg[src_init]                          # get the source message id (1 Byte)
-        msg_type = msg[ptype_init]                       # get the message type (1 Byte)
-        data[4] = msg[n1_size_init]                      # get the size of 1-hop neighborhood (1 Byte)
-        data[5] = msg[n1_init + (0 : 1*data[4] - 1)]     # get the 1-hop neighborhood (1∙|N₁| Bytes)
+        data.n1_size = msgr[n1_size_init]                      # get the size of 1-hop neighborhood (1 Byte)
+        data.n1 = msgr[n1_init + (0:1*data.n1_size - 1)]       # get the 1-hop neighborhood (1∙|N₁| Bytes)
 
         # data indexes
-        global n2_size_init    = n1_init + 1*data[4]
-        global n2_init         = n2_size_init + 1
+        n2_size_init    = n1_init + 1*data.n1_size
+        n2_init         = n2_size_init + 1
 
-        data[6] = msg[n2_size_init + 1]                  # get the size of 2-hop neighborhood (1 Byte)
-        data[7] = msg[n2_init + (0 : 1*data[6] - 1)]     # get the 2-hop neighborhood (1∙|N₂| Bytes)
+        data.n2_size = msgr[n2_size_init]                      # get the size of 2-hop neighborhood (1 Byte)
+        data.n2 = msgr[n2_init + (0:1*data.n2_size - 1)]       # get the 2-hop neighborhood (1∙|N₂| Bytes)
 
         # data indexes
-        global x_init          = n2_init + 1*data[6]
-        global v_init          = x_init + 3*4*data[6]
+        x_init          = n2_init + 1*data.n2_size
+        v_init          = x_init + 3*4*data.n2_size
 
         # allocate pose array (x[i, x | y | θ]) (4∙3∙|N₂| Bytes)
-        data[8] = zeros(Float32, data[6], 3)
+        data.x = zeros(Float32, data.n2_size, 3)
 
         # allocate velocity array (x[i, vx | vy | vθ]) (4∙3∙|N₂| Bytes)
-        data[9] = zeros(Float32, data[6], 3)
+        data.v = zeros(Float32, data.n2_size, 3)
 
-        #=
-         =for i = 0 : 12/3-1
-         =    println("i:$(1+i) x:$(init+3*i) y:$(init+3*i+1) theta:$(init+3*i+2)")
-         =end
-         =#
+        # auxiliary indexes
+        xx_init = x_init
+        xy_init = xx_init + 1*4
+        xt_init = xx_init + 2*4
+        vx_init = v_init
+        vy_init = vx_init + 1*4
+        vt_init = vx_init + 2*4
 
-        for i = 0 : data[6] - 1
+        for i = 1 : data.n2_size
             # get the position values
-            data[8][i + 1, 1] = bytes2num(msg[x_init + 3*i])        # x coordinate (4 Bytes)
-            data[8][i + 1, 2] = bytes2num(msg[x_init + 3*i + 1])    # y coordinate (4 Bytes)
-            data[8][i + 1, 3] = bytes2num(msg[x_init + 3*i + 2])    # θ coordinate (4 Bytes)
+            data.x[i, 1] = bytes2num(msgr[xx_init + (0:3)])    # x coordinate (4 Bytes)
+            data.x[i, 2] = bytes2num(msgr[xy_init + (0:3)])    # y coordinate (4 Bytes)
+            data.x[i, 3] = bytes2num(msgr[xt_init + (0:3)])    # θ coordinate (4 Bytes)
 
             # get the velocity values
-            data[9][i + 1, 1] = bytes2num(msg[v_init + 3*i])        # x coordinate (4 Bytes)
-            data[9][i + 1, 2] = bytes2num(msg[v_init + 3*i + 1])    # y coordinate (4 Bytes)
-            data[9][i + 1, 3] = bytes2num(msg[v_init + 3*i + 2])    # θ coordinate (4 Bytes)
+            data.v[i, 1] = bytes2num(msgr[vx_init + (0:3)])    # x coordinate (4 Bytes)
+            data.v[i, 2] = bytes2num(msgr[vy_init + (0:3)])    # y coordinate (4 Bytes)
+            data.v[i, 3] = bytes2num(msgr[vt_init + (0:3)])    # θ coordinate (4 Bytes)
+
+            # increase auxiliary indexes
+            xx_init = xx_init + 3*4
+            xy_init = xx_init + 1*4
+            xt_init = xx_init + 2*4
+            vx_init = vx_init + 3*4
+            vy_init = vx_init + 1*4
+            vt_init = vx_init + 2*4
         end
     end
 
@@ -140,23 +167,9 @@ end
  = Info: allows the package sending to omnet++ from a abtract data type
  = Use: send_data(data, ip, port), where ip is a string with a destin ip
  = address, port is a integer value representing the port to send and
- = data is a generic array from julia, defined as
- = follows: data[1]  = sender id (UInt8)
- =          data[2]  = current simulation time omnet++ (Float64)
- =          data[3]  = pose array to be send to omnet++ (Array{Float32, n, 2})
- =          data[4]  = number of subsequent messages (UInt8)
- =          data[5]  = destination id (UInt8)
- =          data[6]  = payload size (UInt16)
- =          data[7]  = source id (UInt8)
- =          data[8]  = message type (UInt8)
- =          data[9]  = 1-hop neighborhood size (UInt8)
- =          data[10] = 1-hop neighborhood (Array{UInt8, |N₁|})
- =          data[11] = 2-hop neighborhood size (UInt8)
- =          data[12] = 2-hop neighborhood (Array{UInt8, |N₂|})
- =          data[13] = position array (Array{Float32, |N₂|, 3})
- =          data[14] = velocity array (Array{Float32, |N₂|, 3})
+ = data is a MData struct.
  =#
-function send_data(data, ip = "127.0.0.1", port = 50001)
+function send_data(data::MData, ip = "127.0.0.1", port = 50001)
     # pose array in bytes
     x = zeros(UInt8, 1, 8*n_bot)
 
@@ -165,68 +178,66 @@ function send_data(data, ip = "127.0.0.1", port = 50001)
 
     # build the pose array
     for i = 1 : n_bot
-        x[xx_init + (0:3)] = num2bytes(Float32(data[3][i, 1]))
-        x[xy_init + (0:3)] = num2bytes(Float32(data[3][i, 2]))
+        x[xx_init + (0:3)] = num2bytes(Float32(data.sim_pose[i, 1]))
+        x[xy_init + (0:3)] = num2bytes(Float32(data.sim_pose[i, 2]))
 
         xx_init = xx_init + 2*4
         xy_init = xx_init + 1*4
     end
 
     # build the message package
-    msg = [UInt8(0) ...                      # message type (0:sync, 1:payload) (1 Byte)
-           UInt8(data[1]) ...                # sender id (1 Byte)
-           num2bytes(Float64(data[2])) ...   # simulation time (8 Bytes)
-           UInt8(1) ...                      # active node flag (1:yes, 0:no) (1 Byte)
-           x ...                             # absolute positions to omnet++ (4∙2∙n Bytes)
-           UInt8(data[4])]                   # number of subsequent messages (1 Byte)
+    msg = [UInt8(0) ...                             # message type (0:sync, 1:payload) (1 Byte)
+           UInt8(data.id) ...                       # sender id (1 Byte)
+           num2bytes(Float64(data.sim_time)) ...    # simulation time (8 Bytes)
+           UInt8(1) ...                             # active node flag (1:yes, 0:no) (1 Byte)
+           x ...                                    # absolute positions to omnet++ (4∙2∙n Bytes)
+           UInt8(data.n1_size)]                     # number of subsequent messages (1 Byte)
 
     # send the package
     send(udps, IPv4(ip), port, msg)
 
     # verify if there are payload messages
-    for m = 1 : data[4]
+    for j in data.n1
         # pose array to payload (x[i, x | y | θ]) (4∙3∙|N₂| bytes)
-        x = zeros(UInt8, 4*3*data[11])
+        x = zeros(UInt8, 4*3*data.n2_size)
 
         # velocity array to payload (v[i, vx | vy | vθ]) (4∙3∙|N₂| bytes)
-        v = zeros(UInt8, 4*3*data[11])
+        v = zeros(UInt8, 4*3*data.n2_size)
 
+        # auxiliary indexes
         xx_init = 1
         xy_init = 5
         xt_init = 9
 
-        for i = 1 : data[11]
+        for i = 1 : data.n2_size
             # get the position values
-            x[xx_init + (0:3)] = num2bytes(Float32(data[13][i, 1]))      # x coordinate (4 Bytes)
-            x[xy_init + (0:3)] = num2bytes(Float32(data[13][i, 2]))      # y coordinate (4 Bytes)
-            x[xt_init + (0:3)] = num2bytes(Float32(data[13][i, 3]))      # θ coordinate (4 Bytes)
+            x[xx_init + (0:3)] = num2bytes(Float32(data.x[i, 1]))      # x coordinate (4 Bytes)
+            x[xy_init + (0:3)] = num2bytes(Float32(data.x[i, 2]))      # y coordinate (4 Bytes)
+            x[xt_init + (0:3)] = num2bytes(Float32(data.x[i, 3]))      # θ coordinate (4 Bytes)
 
             # get the velocity values
-            v[xx_init + (0:3)] = num2bytes(Float32(data[14][i, 1]))      # x coordinate (4 Bytes)
-            v[xy_init + (0:3)] = num2bytes(Float32(data[14][i, 2]))      # y coordinate (4 Bytes)
-            v[xt_init + (0:3)] = num2bytes(Float32(data[14][i, 3]))      # θ coordinate (4 Bytes)
+            v[xx_init + (0:3)] = num2bytes(Float32(data.v[i, 1]))      # x coordinate (4 Bytes)
+            v[xy_init + (0:3)] = num2bytes(Float32(data.v[i, 2]))      # y coordinate (4 Bytes)
+            v[xt_init + (0:3)] = num2bytes(Float32(data.v[i, 3]))      # θ coordinate (4 Bytes)
 
+            # increase auxiliary indexes
             xx_init = xx_init + 3*4
             xy_init = xx_init + 1*4
             xt_init = xx_init + 2*4
         end
 
         # build the payload message
-        payload = [UInt8(data[7]) ...                       # source id (1 Byte)
-                   UInt8(data[8]) ...                       # message type (1 Byte)
-                   UInt8(data[9]) ...                       # size of 1-hop neighborhood (1 Byte)
-                   convert(Array{UInt8, 1}, data[10]) ...   # 1-hop neighborhood (1∙|N₁| Bytes)
-                   UInt8(data[11]) ...                      # size of 2-hop neighborhood (1 Byte)
-                   convert(Array{UInt8, 1}, data[12]) ...   # 2-hop neighborhood (1∙|N₂| Bytes)
+        payload = [UInt8(data.n1_size) ...                  # size of 1-hop neighborhood (1 Byte)
+                   convert(Array{UInt8, 1}, data.n1) ...    # 1-hop neighborhood (1∙|N₁| Bytes)
+                   UInt8(data.n2_size) ...                  # size of 2-hop neighborhood (1 Byte)
+                   convert(Array{UInt8, 1}, data.n2) ...    # 2-hop neighborhood (1∙|N₂| Bytes)
                    x ...                                    # pose array (4∙3∙|N₂| Bytes)
                    v]                                       # velocity array (4∙3∙|N₂| Bytes)
 
-        println("payload size (Bytes):$(length(payload))")
-
         # build message package
         msg = [UInt8(1) ...                                 # message type (1:payload) (1 Byte)
-               UInt8(data[5]) ...                           # destination id (1 Byte)
-               num2bytes(UInt16(data[6])) ...               # payload size (2 Bytes)
+               UInt8(j) ...                                 # destination id (1 Byte)
+               num2bytes(UInt16(length(payload))) ...       # payload size (2 Bytes)
                payload]
 
         # send the package
@@ -248,11 +259,17 @@ end
 #
 #=
  = Bytes2Num function
- = Info: converts a UInt8 array to a Float64 number
- = Use: out = bytes2num(in), where in is an UInt8 array and out is a Float64.
+ = Info: converts a UInt8 array to a number
+ = Use: out = bytes2num(in, T), where in is an UInt8 array and T is the data
+ = type of the output. If T is not specified then out is a Float64 number.
  =#
-function bytes2num(input)
-    return hex2num(bytes2hex(input))
+function bytes2num{T<:Number}(input, ::Type{T} = Float64)
+    # verify if the input type is Float
+    if T == Float32 || T == Float64
+        return hex2num(bytes2hex(input))
+    else
+        return parse(T, bytes2hex(input), 16)
+    end
 end
 
 end
