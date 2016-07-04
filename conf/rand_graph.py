@@ -1,7 +1,10 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
 ###############################################################################
 # Random Geometric Graph Generator
 # Written by SIDNEY RDC using NetworkX library.
-# Last Change: 2015 Mar 24 17:34:31
+# Last Change: 2016 Jul 04 15:31:00
 ###############################################################################
 
 import argparse
@@ -84,67 +87,128 @@ if __name__ == "__main__":
     # Initial headers
     f.write('# Topology configuration file\n')
 
-    f.write('\n[simulation-configuration]\n')
+    f.write('\n###############################################################################')
+    f.write('\n[simulation-setup]\n')
     f.write('# Number of iterations\n')
     f.write('n_iter: 100\n')
 
-    f.write('\n# Data capture frequency\n')
+    f.write('\n# Number of robots\n')
+    f.write('n_bot: %d\n' % args.nodes)
+
+    f.write('\n# Number of references (targets)\n')
+    f.write('n_ref: 0\n')
+
+    f.write('\n# Data capture frequency (iterations)\n')
     f.write('dc: 1\n')
-
-    f.write('\n# Information scope')
-    f.write('\n# 0=local 1=global\n')
-    f.write('info_scope: 0\n')
-
-    f.write('\n# Topology control type')
-    f.write('\n# 0=off 1=mst 2=tsp 3=vlink\n')
-    f.write('opt_type: 0\n')
-
-    f.write('\n# Enable reference pass')
-    f.write('\n# 0=off 1=on\n')
-    f.write('ref_pass: 0\n')
-
-    f.write('\n# Enable communication radius constraint')
-    f.write('\n# 0=off 1=on\n')
-    f.write('com_c: 0\n')
-
-    f.write('\n# Enable security radius constraint')
-    f.write('\n# 0=off 1=on\n')
-    f.write('sec_c: 0\n')
 
     f.write('\n# Enable ROS interface')
     f.write('\n# 0=off 1=on\n')
     f.write('ros: 0\n')
 
+    f.write('\n# Information scope')
+    f.write('\n# 0=local 1=global\n')
+    f.write('info_scope: 0\n')
+
+    f.write('\n###############################################################################')
+    f.write('\n[control-setup]\n')
+    f.write('# Integration step (s)\n')
+    f.write('dt: 0.1\n')
+
+    f.write('\n# Prediction horizon\n')
+    f.write('ph: 5\n')
+
+    f.write('\n# Weights to motion control\n')
+    f.write('# gamma: γ₁ γ₂ γ₃ γ₄ γ₅ γ₆ γ₇\n')
+    f.write('gamma: 1 1 1 1 1 0.1 0\n')
+
+    f.write('\n# Saturation to linear control signal (m/s)\n')
+    f.write('# vx: min max\n')
+    f.write('vx_lim: -1 1\n')
+
+    f.write('\n# Saturation to angular control signal (rad/s)\n')
+    f.write('# va: min max\n')
+    f.write('va_lim: -1 1\n')
+
+    f.write('\n# Enable communication radius constraint\n')
+    f.write('# 0=off 1=on\n')
+    f.write('c_com: 0\n')
+
+    f.write('\n# Enable security radius constraint\n')
+    f.write('# 0=off 1=on\n')
+    f.write('c_sec: 0\n')
+
+    f.write('\n###############################################################################')
+    f.write('\n[network-setup]\n')
+    f.write('# Gaussian white noise standard deviation (σ)\n')
+    f.write('sigma: 0.25\n')
+
+    f.write('\n# RSSI maximum attenuation factor (μ) (dBm)\n')
+    f.write('# min=-90 max=0\n')
+    f.write('mu: 0\n')
+
+    f.write('\n# Path loss exponent (Φ)\n')
+    f.write('# free space=2\n')
+    f.write('# urban area=2.7 to 3.5\n')
+    f.write('# suburban area=3 to 5\n')
+    f.write('# indoor (line-of-sight)=1.6 to 1.8\n')
+    f.write('phi: 2\n')
+
+    f.write('\n# Use RSSI readings\n')
+    f.write('# 0=off 1=on\n')
+    f.write('rssi: 1\n')
+
+    f.write('\n# RSSI noise\n')
+    f.write('# 0=off 1=on\n')
+    f.write('rssi_noise: 1\n')
+
+    f.write('\n# RSSI threshold (dBm)\n')
+    f.write('# min=-90 max=0\n')
+    f.write('rssi_lim: -23\n')
+
+    f.write('\n# Topology type\n')
+    f.write('# 0=fixed 1=dynamic\n')
+    f.write('top_type: 1\n')
+
+    f.write('\n# Omnet++ interface\n')
+    f.write('# 0=off 1=on\n')
+    f.write('omnet: 0\n')
+
     # Headers for position
+    f.write('\n###############################################################################')
     f.write('\n[robot-positions]\n')
-    f.write('# bot: x y\n')
+    f.write('# bot: x y θ\n')
 
     # Write positions on archive file
     for n in pos:
-        f.write('%d: %f %f\n' % (n,pos[n][0]*scale,pos[n][1]*scale))
+        f.write('%d: %f %f 0\n' % (n+1,pos[n][0]*scale,pos[n][1]*scale))
 
     # Headers for velocity
+    f.write('\n###############################################################################')
     f.write('\n[robot-velocities]\n')
-    f.write('# bot: vx vy\n')
+    f.write('# bot: vx vy vθ\n')
 
     # Headers for radius
+    f.write('\n###############################################################################')
     f.write('\n[robot-ranges]\n')
-    f.write('# bot: R r\n')
+    f.write('# bot: rsec rcov rcom\n')
 
     # Write radius on archive file
     for n in xrange(0, args.nodes):
-        f.write('%d: %.1f 0.0\n' % (n,args.radius*scale))
+        f.write('%d: 0.0 %.1f %.1f\n' % (n+1,(args.radius*scale*0.9)/2,args.radius*scale))
 
     # Headers to external robots
+    f.write('\n###############################################################################')
     f.write('\n[external-robots]\n')
     f.write('# bot: type \'name\'\n')
     f.write('# 1=real 2=stage 3=turtle\n')
 
     # Headers to reference
+    f.write('\n###############################################################################')
     f.write('\n[reference]\n')
-    f.write('# bot: x y\n')
+    f.write('# bot: x y θ\n')
 
     # Headers to timeout configuration
+    f.write('\n###############################################################################')
     f.write('\n[timeout]\n')
     f.write('# bot: timeout (iter)\n')
 

@@ -2,7 +2,7 @@
 % Robot's Position Plotter
 %
 % Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
-% Last Change: 2016 Jun 11 03:40:26
+% Last Change: 2016 Jul 04 17:55:19
 % Info: This code is able to plot the robot's positions from the topology
 % control algorithm
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -61,8 +61,8 @@ end
 % insert a gain to slack
 slack = slack*1.1;
 
-xpose = x_data(:, 1, 1:100);
-ypose = x_data(:, 2, 1:100);
+xpose = x_data(:, 1, :);
+ypose = x_data(:, 2, :);
 
 % get the axis limits
 xmin = min(xpose(:));
@@ -74,7 +74,7 @@ ymax = max(ypose(:));
 xmin = xmin - slack;
 if xmax < 0
     xmax = xmax - slack;
-elseif xmax > 0
+elseif xmax >= 0
     xmax = xmax + slack;
 end
 
@@ -82,7 +82,7 @@ end
 ymin = ymin - slack;
 if ymax < 0
     ymax = ymax - slack;
-elseif ymax > 0
+elseif ymax >= 0
     ymax = ymax + slack;
 end
 
@@ -106,15 +106,15 @@ for t = 1 : 1 : N
             % euclidian distance between i and j
             dij = norm(xi - xj);
 
-            if S_data(i, j, t) >= s_min && dij <= r_com(i, t) && dij <= r_com(j, t)
+            if S_data(i, j, t) >= rssi_lim && dij <= r_com(i, t) && dij <= r_com(j, t)
                 % plot a continuous line when the link between i and j is real
                 line([xi(1) xj(1)], [xi(2) xj(2)], 'LineStyle', '-', 'Linewidth', LINE_WIDTH, 'Color', 'b');
 
-            elseif S_data(j, i, t) >= s_min && dij <= r_com(i, t) && dij > r_com(j, t)
+            elseif S_data(j, i, t) >= rssi_lim && dij <= r_com(i, t) && dij > r_com(j, t)
                 % plot a continuous arrow from i to j
                 draw_line2([xi(1) xi(2)], [xj(1) xj(2)], 'LineStyle', '-', 'LineColor', 'b', 'ArrowColor', 'b', 'ArrowEdgeColor', 'b', 'ArrowLength', ARROW_LENGTH, 'LineWidth', LINE_WIDTH);
 
-            elseif S_data(i, j, t) >= s_min && dij > r_com(i, t) && dij <= r_com(j, t)
+            elseif S_data(i, j, t) >= rssi_lim && dij > r_com(i, t) && dij <= r_com(j, t)
                 % plot a continuous arrow from j to i
                 draw_line2([xj(1) xj(2)], [xi(1) xi(2)], 'LineStyle', '-', 'LineColor', 'b', 'ArrowColor', 'b', 'ArrowEdgeColor', 'b', 'ArrowLength', ARROW_LENGTH, 'LineWidth', LINE_WIDTH);
 
