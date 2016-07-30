@@ -4,7 +4,7 @@
 ###############################################################################
 # Random Geometric Graph Generator
 # Written by SIDNEY RDC using NetworkX library.
-# Last Change: 2016 Jul 04 15:31:00
+# Last Change: 2016 Jul 06 16:51:59
 ###############################################################################
 
 import argparse
@@ -122,11 +122,11 @@ if __name__ == "__main__":
     f.write('gamma: 1 1 1 1 1 0.1 0\n')
 
     f.write('\n# Saturation to linear control signal (m/s)\n')
-    f.write('# vx: min max\n')
+    f.write('# vx_lim: min max\n')
     f.write('vx_lim: -1 1\n')
 
     f.write('\n# Saturation to angular control signal (rad/s)\n')
-    f.write('# va: min max\n')
+    f.write('# va_lim: min max\n')
     f.write('va_lim: -1 1\n')
 
     f.write('\n# Enable communication radius constraint\n')
@@ -163,7 +163,7 @@ if __name__ == "__main__":
 
     f.write('\n# RSSI threshold (dBm)\n')
     f.write('# min=-90 max=0\n')
-    f.write('rssi_lim: -23\n')
+    f.write('rssi_lim: -90\n')
 
     f.write('\n# Topology type\n')
     f.write('# 0=fixed 1=dynamic\n')
@@ -205,7 +205,7 @@ if __name__ == "__main__":
     # Headers to reference
     f.write('\n###############################################################################')
     f.write('\n[reference]\n')
-    f.write('# bot: x y θ\n')
+    f.write('# ref: x y θ\n')
 
     # Headers to timeout configuration
     f.write('\n###############################################################################')

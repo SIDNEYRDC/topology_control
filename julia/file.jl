@@ -2,7 +2,7 @@
  = File Module to Topology Control Algorithm
  =
  = Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
- = Last Change: 2016 Jul 04 14:18:44
+ = Last Change: 2016 Jul 07 17:24:26
  = Info: This source contains the module to access text files in julia.
  =============================================================================#
 
@@ -43,6 +43,7 @@ type Conf
     r_sec::Array{Float32, 1}
     r_cov::Array{Float32, 1}
     r_com::Array{Float32, 1}
+    timeout::Array{Float32, 1}
 end
 
 #
@@ -61,7 +62,7 @@ function read_conf(input)
     file = replace(replace(string(split(file, r"\#.*\n")), "\",\"", ""), "\\n", '\n')
 
     # the output file
-    output = Conf(0, 0, 0, 0, 0, 0, 0, [0], [0], [0], 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, [0 0], [0 0], [0], [0], [0])
+    output = Conf(0, 0, 0, 0, 0, 0, 0, [0], [0], [0], 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, [0 0], [0 0], [0], [0], [0], [0])
 
     # extract data
     output.n_iter = extract_data("n\\_iter:\\s*\\d+", "simulation-setup", file)
@@ -94,6 +95,9 @@ function read_conf(input)
     output.r_cov = zeros(UInt8, output.n_bot)
     output.r_com = zeros(UInt8, output.n_bot)
 
+    # timeout array
+    output.timeout = fill(Inf32, output.n_bot)
+
     for i = 1 : output.n_bot
         # extract pose and velocity
         output.x[i, :] = extract_data("$(i):(\\s*\\-?\\d+\\.?\\d*(\\s+|\\n)){3}", "robot-positions", file)
@@ -105,6 +109,10 @@ function read_conf(input)
         output.r_sec[i] = range[1]
         output.r_cov[i] = range[2]
         output.r_com[i] = range[3]
+
+        # extract timeout
+        timeout = extract_data("$(i):\\s*\\d+", "timeout", file, false)
+        timeout != nothing ? output.timeout[i] = timeout : 0
     end
 
     return output
@@ -127,8 +135,8 @@ function extract_data(expr, group, input, mandatory = true)
 
     # verify if the group has been found
     if gs == nothing
-        mandatory == true ? print_with_color(:red, "ERROR: group '$(group)' not found in the configuration file!\n") : 0
-        return
+        print_with_color(:red, "ERROR: group '$(group)' not found in the configuration file!\n")
+        exit(1)
     end
 
     # find the group boundary
@@ -138,8 +146,10 @@ function extract_data(expr, group, input, mandatory = true)
     gb != nothing ? m = match(Regex(expr), input[gs.offset:gb.offset]) : m = match(Regex(expr), input, gs.offset)
 
     # exit if there is no compatible string
-    if m == nothing
-        mandatory == true ? print_with_color(:red, "ERROR: key '$(expr)' not found in the configuration file!\n") : 0
+    if m == nothing && mandatory == true
+        print_with_color(:red, "ERROR: key '$(expr)' not found in the configuration file!\n")
+        exit(1)
+    elseif m == nothing
         return
     end
 

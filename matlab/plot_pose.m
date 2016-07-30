@@ -2,7 +2,7 @@
 % Robot's Position Plotter
 %
 % Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
-% Last Change: 2016 Jul 04 17:55:19
+% Last Change: 2016 Jul 07 23:58:48
 % Info: This code is able to plot the robot's positions from the topology
 % control algorithm
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -106,15 +106,15 @@ for t = 1 : 1 : N
             % euclidian distance between i and j
             dij = norm(xi - xj);
 
-            if S_data(i, j, t) >= rssi_lim && dij <= r_com(i, t) && dij <= r_com(j, t)
+            if A_data(i, j, t) == 1 && S_data(i, j, t) >= rssi_lim && dij <= r_com(i, t) && dij <= r_com(j, t)
                 % plot a continuous line when the link between i and j is real
                 line([xi(1) xj(1)], [xi(2) xj(2)], 'LineStyle', '-', 'Linewidth', LINE_WIDTH, 'Color', 'b');
 
-            elseif S_data(j, i, t) >= rssi_lim && dij <= r_com(i, t) && dij > r_com(j, t)
+            elseif A_data(i, j, t) == 1 && S_data(j, i, t) >= rssi_lim && dij <= r_com(i, t) && dij > r_com(j, t)
                 % plot a continuous arrow from i to j
                 draw_line2([xi(1) xi(2)], [xj(1) xj(2)], 'LineStyle', '-', 'LineColor', 'b', 'ArrowColor', 'b', 'ArrowEdgeColor', 'b', 'ArrowLength', ARROW_LENGTH, 'LineWidth', LINE_WIDTH);
 
-            elseif S_data(i, j, t) >= rssi_lim && dij > r_com(i, t) && dij <= r_com(j, t)
+            elseif A_data(i, j, t) == 1 && S_data(i, j, t) >= rssi_lim && dij > r_com(i, t) && dij <= r_com(j, t)
                 % plot a continuous arrow from j to i
                 draw_line2([xj(1) xj(2)], [xi(1) xi(2)], 'LineStyle', '-', 'LineColor', 'b', 'ArrowColor', 'b', 'ArrowEdgeColor', 'b', 'ArrowLength', ARROW_LENGTH, 'LineWidth', LINE_WIDTH);
 

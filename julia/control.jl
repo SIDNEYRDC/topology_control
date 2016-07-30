@@ -2,7 +2,7 @@
  = Control Module to Topology Control Algorithm in Julia
  =
  = Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
- = Last Change: 2016 Jun 29 19:46:23
+ = Last Change: 2016 Jul 07 16:21:13
  = Info: This file contains the motion control algorithms used in the topology
  = control algorithm.
  =============================================================================#
@@ -49,6 +49,8 @@ function hl_motion_control(i, A, H, D, S, T, TI, n_bot, n_ref, x, v, r_com, r_co
     # calculate the desired angle theta
     dx = x[i, 1] - ci[1]
     dx != 0 ? dtheta = atan((x[i, 2] - ci[2])/dx) : dtheta = 0
+
+    dtheta = 0
 
     for j in N2
         # auxiliary matrices definition

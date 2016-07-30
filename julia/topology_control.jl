@@ -2,7 +2,7 @@
  = Topology Control Algorithm using Consensus and MPC
  =
  = Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
- = Last Change: 2016 Jul 04 18:09:49
+ = Last Change: 2016 Jul 07 19:08:38
  = Info: This code is able to adapts the network topology to RSSI variations
  = and adjust the angle between the robots to reach the best connectivity
  =============================================================================#
@@ -117,7 +117,6 @@ for t = 1 : cfg.n_iter
                 D[i, j, t] = D[j, i, t] = norm(x[i, 1 : 2, t] - x[j, 1 : 2, t])
 
                 #=i == 1 && t > 80 && t < 250 ? R[i, j] = R[j, i] = -5 : R[i, j] = R[j, i] = 0=#
-
                 # fill RSSI matrix using the model: Sij = - 10 ∙ Φ ∙ log(dij) + C
                 # can be found in: doi.org/10.1109/ICIT.2013.6505900
                 S[i, j, t] = - 10*cfg.phi*log10(D[i, j, t]) + R[i, j] + G[i, j, t]*cfg.rssi_noise
@@ -150,6 +149,14 @@ for t = 1 : cfg.n_iter
                 A[i, j, t] = A[i, j, t - 1]
                 A[j, i, t] = A[j, i, t - 1]
             end
+        end
+    end
+
+    # process timeout
+    for i in find(cfg.timeout .!= Inf)
+        if t > cfg.timeout[i]
+            A[i, :, t] = zeros(1, cfg.n_bot)
+            A[:, i, t] = zeros(cfg.n_bot, 1)
         end
     end
 
@@ -190,22 +197,26 @@ for t = 1 : cfg.n_iter
         # check if the i's near neighbourhood was changed
         if t == 1 || sum(A[i, 1 : cfg.n_bot, t] - A[i, 1 : cfg.n_bot, t - 1]) != 0
             # get the neighbourhood from i (2-hop)
-            N = neighbourhood(A[:, 1 : cfg.n_bot, t], i, 2)
+            global N = neighbourhood(A[:, 1 : cfg.n_bot, t], i, 2)
 
-            # reduce the distance matrix to i's neighbourhood and get
-            # the Hamiltonian cycle from TSP's solution
-            H_i = tsp(matreduce(D[:, :, t], N))
+            if length(N) > 1
+                # reduce the distance matrix to i's neighbourhood and get
+                # the Hamiltonian cycle from TSP's solution
+                H_i = tsp(matreduce(D[:, :, t], N))
 
-            # fill the Hamiltonian's cycle matrix with H_i line
-            for j = 1 : length(N)
-                H[i, N[j], t] = H_i[1, j]
+                # fill the Hamiltonian's cycle matrix with H_i line
+                for j = 1 : length(N)
+                    H[i, N[j], t] = H_i[1, j]
+                end
+            else
+                H[i, :, t] = zeros(1, cfg.n_bot)
             end
         else
             # keep the earlier Hamiltonian matrix state to the actual iteration
             H[i, :, t] = H[i, :, t - 1]
         end
 
-        if t != cfg.n_iter
+        if t != cfg.n_iter && length(N) > 1
             # high level motion control
             v[i, :, t + 1], c[i, :, t + 1] = hl_motion_control(i, A[:, :, t],
                                                                H[:, :, t],
@@ -226,6 +237,9 @@ for t = 1 : cfg.n_iter
 
             # upgrade the position
             x[i, :, t + 1] = x[i, :, t] + v[i, :, t + 1]*cfg.dt
+        elseif t != cfg.n_iter
+            # keep the older position if there are no neighbors
+            x[i, :, t + 1] = x[i, :, t]
         end
     end
 
