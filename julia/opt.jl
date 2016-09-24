@@ -2,7 +2,7 @@
  = Optimization Module
  =
  = Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
- = Last Change: 2016 Jun 04 16:07:51
+ = Last Change: 2016 Set 24 17:03:06
  = Info: This file contains the optimization module that is used to solve some
  = problems using mathematic programming and optimization algorithms.
  =============================================================================#

@@ -2,7 +2,7 @@
  = Network Module for Topology Control Algorithm in Julia
  =
  = Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
- = Last Change: 2016 Jun 27 15:49:23
+ = Last Change: 2016 Set 19 11:02:30
  = Info: This file contains the functions to access the network interface and
  = protocols by the Topology Control main algorithm.
  =============================================================================#
@@ -164,8 +164,8 @@ end
 #
 #=
  = send_data function
- = Info: allows the package sending to omnet++ from a abtract data type
- = Use: send_data(data, ip, port), where ip is a string with a destin ip
+ = Info: allows the package sending to omnet++ from a abstract data type
+ = Use: send_data(data, ip, port), where ip is a string with a destination ip
  = address, port is a integer value representing the port to send and
  = data is a MData struct.
  =#

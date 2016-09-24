@@ -2,7 +2,7 @@
  = File Module to Topology Control Algorithm
  =
  = Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
- = Last Change: 2016 Jul 07 17:24:26
+ = Last Change: 2016 Set 23 15:53:04
  = Info: This source contains the module to access text files in julia.
  =============================================================================#
 
@@ -56,7 +56,7 @@ end
  =#
 function read_conf(input)
     # open and read the whole configuration file
-    file = readall(open(input))
+    file = readstring(open(input))
 
     # remove comments and insert line feed
     file = replace(replace(string(split(file, r"\#.*\n")), "\",\"", ""), "\\n", '\n')

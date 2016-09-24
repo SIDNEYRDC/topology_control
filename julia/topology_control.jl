@@ -2,7 +2,7 @@
  = Topology Control Algorithm using Consensus and MPC
  =
  = Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
- = Last Change: 2016 Jul 07 19:08:38
+ = Last Change: 2016 Set 24 18:26:32
  = Info: This code is able to adapts the network topology to RSSI variations
  = and adjust the angle between the robots to reach the best connectivity
  =============================================================================#
@@ -218,9 +218,9 @@ for t = 1 : cfg.n_iter
 
         if t != cfg.n_iter && length(N) > 1
             # high level motion control
-            v[i, :, t + 1], c[i, :, t + 1] = hl_motion_control(i, A[:, :, t],
-                                                               H[:, :, t],
-                                                               D[:, :, t],
+            v[i, :, t + 1], c[i, :, t + 1] = hl_motion_control(i, A[i, :, t],
+                                                               H[i, :, t],
+                                                               D[i, :, t],
                                                                S[i, :, t], T,
                                                                TI, cfg.n_bot,
                                                                cfg.n_ref,
