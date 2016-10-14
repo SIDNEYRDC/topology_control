@@ -2,7 +2,7 @@
  = Topology Control Algorithm using Consensus and MPC
  =
  = Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
- = Last Change: 2016 Set 24 18:26:32
+ = Last Change: 2016 Out 13 14:50:43
  = Info: This code is able to adapts the network topology to RSSI variations
  = and adjust the angle between the robots to reach the best connectivity
  =============================================================================#
@@ -194,12 +194,12 @@ for t = 1 : cfg.n_iter
     # control loop
     for i = 1 : cfg.n_bot
 
-        # check if the i's near neighbourhood was changed
+        # check if the i's near neighbourhood has changed
         if t == 1 || sum(A[i, 1 : cfg.n_bot, t] - A[i, 1 : cfg.n_bot, t - 1]) != 0
             # get the neighbourhood from i (2-hop)
             global N = neighbourhood(A[:, 1 : cfg.n_bot, t], i, 2)
 
-            if length(N) > 1
+            if length(N) > 2
                 # reduce the distance matrix to i's neighbourhood and get
                 # the Hamiltonian cycle from TSP's solution
                 H_i = tsp(matreduce(D[:, :, t], N))
@@ -218,7 +218,7 @@ for t = 1 : cfg.n_iter
 
         if t != cfg.n_iter && length(N) > 1
             # high level motion control
-            v[i, :, t + 1], c[i, :, t + 1] = hl_motion_control(i, A[i, :, t],
+            u, c[i, :, t + 1] = hl_motion_control(i, A[i, :, t],
                                                                H[i, :, t],
                                                                D[i, :, t],
                                                                S[i, :, t], T,
@@ -234,6 +234,8 @@ for t = 1 : cfg.n_iter
                                                                cfg.rssi,
                                                                cfg.vx_lim,
                                                                cfg.va_lim)
+
+            v[i, :, t + 1] =  v[i, :, t] + u'*cfg.dt
 
             # upgrade the position
             x[i, :, t + 1] = x[i, :, t] + v[i, :, t + 1]*cfg.dt

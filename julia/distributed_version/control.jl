@@ -2,7 +2,7 @@
  = Control Module to Topology Control Algorithm in Julia
  =
  = Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
- = Last Change: 2016 Set 25 02:26:56
+ = Last Change: 2016 Set 30 15:00:10
  = Info: This file contains the motion control algorithms used in the topology
  = control algorithm.
  =============================================================================#
@@ -26,7 +26,7 @@ export hl_motion_control
  = array to the neighborhood of i, h is the control step time, p is the
  = prediction horizon to the MPC and gamma is a weight array to MPC.
  =#
-function hl_motion_control(i, Ai, Hi, Di, Si, T, TI, n_bot, n_ref, x, v, r_com, r_cov, dt, p, gamma, phi, RSSI_SENS, vxl, val)
+function hl_motion_control(i, Ai, Hi, Si, T, TI, n_bot, n_ref, x, v, r_com, r_cov, dt, p, gamma, phi, RSSI_SENS, vxl, val)
     # auxiliary matrices definition
     Gixy = zeros(p, p)
     Githeta = zeros(p, p)
@@ -56,7 +56,7 @@ function hl_motion_control(i, Ai, Hi, Di, Si, T, TI, n_bot, n_ref, x, v, r_com, 
         Sij = fill(10*phi*log(r_cov[i] + r_cov[j]) - abs(Si[j]), p, 1)
 
         # enable RSSI sensing
-        RSSI_SENS == 1 ? dij = 10^(Si[j]/(-10*phi)) : dij = Di[j]
+        RSSI_SENS == 1 ? dij = 10^(Si[j]/(-10*phi)) : dij = norm(x[i, 1 : 2] - x[j, 1 : 2])
 
         # calculate the desired position to x and y coordinates
         dxy = (x[i, 1 : 2] - x[j, 1 : 2])*(r_cov[i] + r_cov[j])/dij + x[j, 1 : 2]

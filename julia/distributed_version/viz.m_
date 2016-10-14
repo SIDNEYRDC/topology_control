@@ -58,13 +58,13 @@ BYTE_THRUST = BYTE_YAW + 4 ;
 BYTE_TORQUE = BYTE_THRUST + 12 ;
 STATE_SIZE = 44 ;
 TRUPLE_SIZE = 12 ;
-NUM_DRONES = 5 ;
+NUM_DRONES = 10 ;
 % position = zeros(NUM_DRONES,3) ;
-colorcode = lines( 5 ) ;
+
 
 %% cycle to show movement
 clf
-set( gcf , 'position', [ 1130 432 970 922 ] )
+set( gcf , 'position', [ 113  432 570 422 ] )
 t = cell(1,10) ;
 position = cell(1,10) ;
 for drone_id = 1 : NUM_DRONES
@@ -73,11 +73,9 @@ end
 
 while ( 1 )
     for drone_id = 1 : NUM_DRONES
-        t{drone_id} = t{drone_id} + 1 ;
         range = drone_id * STATE_SIZE + ( BYTE_POSITION + (1:TRUPLE_SIZE) ) ;
+        t{drone_id} = t{drone_id} + 1 ;
         position{drone_id}( t{drone_id} , 1 : 3 ) = double(typecast( layout_memoryshare.Data( range ) , 'single' )) ;
-        range = drone_id * STATE_SIZE + ( BYTE_YAW + (1:4) ) ;
-        yaw{drone_id}( t{drone_id} ) = double(typecast( layout_memoryshare.Data( range ) , 'single' )) ;
     end
     
     clf
@@ -87,49 +85,18 @@ while ( 1 )
     for drone_id = 1 : NUM_DRONES
         plot(   position{drone_id}( 1:t{drone_id} , 1 ) , ...
                 position{drone_id}( 1:t{drone_id} , 2 ) , ...
-                '-.', 'color' , colorcode ( drone_id , : ) )
-        
-		tmpyaw_deg = yaw{drone_id}( t{drone_id} ) + 90 ;
-		tmpyaw_rad = tmpyaw_deg*pi/180 ;
-		R = [ cos( tmpyaw_rad ) , -sin( tmpyaw_rad) ; sin( tmpyaw_rad) , cos( tmpyaw_rad ) ] ;
-		
-		% drones 4 rotors
-		x = position{drone_id}( t{drone_id} , 1 ) ;
-		y = position{drone_id}( t{drone_id} , 2 ) ;
-		offset = pi/4 ;
-		for i = 1 :4 
-			offset = offset + pi/2 ;
-			xx(i) = x + 2*cos(tmpyaw_rad+offset) ;
-			yy(i) = y + 2*sin(tmpyaw_rad+offset) ;
-		end
-		plot( x   , ...
-              y   , ...
-                'ko', ...
-                'markerfacecolor' , colorcode ( drone_id , : ) ,...
-                'markersize' , 10 )
-                
-		plot( xx  , ...
-              yy  , ...
-                'ko', 'markerfacecolor' , colorcode ( drone_id , : ) )
-                
-        
-		
-		% front tip
-		plot(   position{drone_id}( t{drone_id} , 1 ) + 2*cos(tmpyaw_rad  ) , ...
-                position{drone_id}( t{drone_id} , 2 ) + 2*sin( tmpyaw_rad )  , ...
-                'ko', ...
-                'markerfacecolor' , 'k',...
-                'markersize', 4 )       
-         
-        % label        
-        text(	position{drone_id}( t{drone_id} , 1 ) + -0.5 , ...
-                position{drone_id}( t{drone_id} , 2 ) + 0.5  , ...
-				sprintf('%01d', drone_id  ) , 'color','w' ) ;
+                '-k')
+        plot(   position{drone_id}( t{drone_id} , 1 ) , ...
+                position{drone_id}( t{drone_id} , 2 ) , ...
+                'ok')
+            
+        text(	position{drone_id}( t{drone_id} , 1 ) ,...
+				position{drone_id}( t{drone_id} , 2 ) , ...
+				sprintf('#%d', drone_id) ) ;
 
     end
-    %axis([-1 1  -1 1] * 80 )
+    axis([-1 1  -1 1] * 80 )
     axis square
-    axis equal
     title(sprintf('Clock: %0.4fs' , 1/1e6*single(getSimClock( clock_memoryshare )) ) )
     pause(0.5)
 end
