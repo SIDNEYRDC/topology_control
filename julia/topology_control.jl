@@ -2,7 +2,7 @@
  = Topology Control Algorithm using Consensus and MPC
  =
  = Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
- = Last Change: 2016 Out 13 14:50:43
+ = Last Change: 2017 Fev 20 18:42:13
  = Info: This code is able to adapts the network topology to RSSI variations
  = and adjust the angle between the robots to reach the best connectivity
  =============================================================================#
@@ -45,6 +45,10 @@ x[1:cfg.n_bot, :, 1] = cfg.x
 # v(i | n_bot + r, [vx vy vθ], t)
 v = zeros(cfg.n_bot + cfg.n_ref, 3, cfg.n_iter)
 v[1:cfg.n_bot, :, 1] = cfg.v
+
+# control array
+# u(i | n_bot + r, [vx vy vθ], t)
+u = zeros(cfg.n_bot, 3, cfg.n_iter)
 
 # initial communication radius
 # rcom(i, rcom, t)
@@ -97,8 +101,10 @@ H = zeros(UInt8, cfg.n_bot, cfg.n_bot, cfg.n_iter)
  =#
 
 # constant matrices to motion control
-const T = tril(ones(Int8, cfg.ph, cfg.ph))
+const T = tril(ones(cfg.ph, cfg.ph))
 const TI = inv(T)
+const T2 = T^2
+const P = diagm(collect(1 : cfg.ph))
 
 # enable omnet++ interface
 cfg.omnet == 1 ? omnet_interface_init(cfg.n_bot) : 0
@@ -218,24 +224,28 @@ for t = 1 : cfg.n_iter
 
         if t != cfg.n_iter && length(N) > 1
             # high level motion control
-            u, c[i, :, t + 1] = hl_motion_control(i, A[i, :, t],
-                                                               H[i, :, t],
-                                                               D[i, :, t],
-                                                               S[i, :, t], T,
-                                                               TI, cfg.n_bot,
-                                                               cfg.n_ref,
-                                                               x[:, :, t],
-                                                               v[:, :, t],
-                                                               r_com[:, t],
-                                                               r_cov[:, t],
-                                                               cfg.dt, cfg.ph,
-                                                               cfg.gamma,
-                                                               cfg.phi,
-                                                               cfg.rssi,
-                                                               cfg.vx_lim,
-                                                               cfg.va_lim)
+#=           v[i, :, t + 1], c[i, :, t + 1] = mpc_1st_order(i, A[i, :, t],=#
+                                                               #=H[i, :, t],=#
+                                                               #=D[i, :, t],=#
+                                                               #=S[i, :, t], T,=#
+                                                               #=TI, cfg.n_bot,=#
+                                                               #=cfg.n_ref,=#
+                                                               #=x[:, :, t],=#
+                                                               #=v[:, :, t],=#
+                                                               #=r_com[:, t],=#
+                                                               #=r_cov[:, t],=#
+                                                               #=cfg.dt, cfg.ph,=#
+                                                               #=cfg.gamma,=#
+                                                               #=cfg.phi,=#
+                                                               #=cfg.rssi,=#
+                                                               #=cfg.vx_lim,=#
+                                                               #=cfg.va_lim)=#
 
-            v[i, :, t + 1] =  v[i, :, t] + u'*cfg.dt
+            u[i, :, t + 1] = mpc_2nd_order(i, cfg.n_bot, cfg.dt, cfg.ph, x[:, :, t],
+                             v[:, :, t], u[:, :, t], A[i, :, t], H[i, :, t], D[i, :, t],
+                             S[i, :, t], T, TI, T2, P, r_com[:, t], r_cov[:, t], cfg.gamma, [-1 -1 -1], [1 1 1])
+
+            v[i, :, t + 1] =  v[i, :, t] + u[i, :, t + 1]*cfg.dt
 
             # upgrade the position
             x[i, :, t + 1] = x[i, :, t] + v[i, :, t + 1]*cfg.dt
@@ -272,6 +282,7 @@ write(file, "v_data", v)
 write(file, "r_com", r_com)
 write(file, "r_cov", r_cov)
 write(file, "A_data", max(A[:, 1 : cfg.n_bot, :], H))
+write(file, "H_data", H)
 write(file, "S_data", S)
 write(file, "G_data", G)
 write(file, "D_data", D)
