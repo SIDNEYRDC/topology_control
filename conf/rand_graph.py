@@ -4,7 +4,7 @@
 ###############################################################################
 # Random Geometric Graph Generator
 # Written by SIDNEY RDC using NetworkX library.
-# Last Change: 2016 Jul 06 16:51:59
+# Last Change: 2017 Feb 21 17:39:10
 ###############################################################################
 
 import argparse
@@ -121,13 +121,13 @@ if __name__ == "__main__":
     f.write('# gamma: γ₁ γ₂ γ₃ γ₄ γ₅ γ₆ γ₇\n')
     f.write('gamma: 1 1 1 1 1 0.1 0\n')
 
-    f.write('\n# Saturation to linear control signal (m/s)\n')
-    f.write('# vx_lim: min max\n')
-    f.write('vx_lim: -1 1\n')
+    f.write('\n# Lower bound to control signal\n')
+    f.write('# u_min: xmin ymin θmin\n')
+    f.write('u_min: -1 -1 -1\n')
 
-    f.write('\n# Saturation to angular control signal (rad/s)\n')
-    f.write('# va_lim: min max\n')
-    f.write('va_lim: -1 1\n')
+    f.write('\n# Upper bound to control signal\n')
+    f.write('# u_max: xmax ymax θmax\n')
+    f.write('u_max: 1 1 1\n')
 
     f.write('\n# Enable communication radius constraint\n')
     f.write('# 0=off 1=on\n')
