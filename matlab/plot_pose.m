@@ -2,7 +2,7 @@
 % Robot's Position Plotter
 %
 % Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
-% Last Change: 2016 Jul 07 23:58:48
+% Last Change: 2017 Fev 13 18:14:02
 % Info: This code is able to plot the robot's positions from the topology
 % control algorithm
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -34,7 +34,7 @@ COV_RAD = 1;
 % show velocity directions
 % 0: off
 % 1: show
-VEL_DIR = 0;
+VEL_DIR = 1;
 
 %% Main Code %%
 

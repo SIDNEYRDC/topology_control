@@ -2,7 +2,7 @@
  = Topology Control Algorithm using Consensus and MPC (Distributed version)
  =
  = Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
- = Last Change: 2016 Out 13 17:53:19
+ = Last Change: 2016 Nov 29 13:56:07
  = Info: This code is able to adapt the network topology to RSSI variations
  = and adjust the angle between the robots to reach the best connectivity
  =============================================================================#
@@ -245,7 +245,7 @@ while true
                                  x, u, rcom, rcov, dt, p, gamma,
                                  0, 0, vx_lim, va_lim)
 
-    a = (u[id, 1:2] - (x[id, 1:2] - x_)/dt)*1
+    #=a = (u[id, 1:2] - (x[id, 1:2] - x_)/dt)*1=#
 
     for j in N1
         println("D$(id)$(j)=$(norm(x[id, 1:2] - x[j, 1:2]))")

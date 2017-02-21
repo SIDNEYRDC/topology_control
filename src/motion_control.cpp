@@ -1,7 +1,7 @@
 /**********************************************************************
 *   Motion control algorithms
 *   Written by Sidney RDC, 2014.
-*   Last Change: 2015 Abr 11 16:40:44
+*   Last Change: 2016 Out 21 15:43:27
 ***********************************************************************/
 
 #include "motion_control.hpp"
