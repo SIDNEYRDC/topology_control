@@ -2,7 +2,7 @@
  = File Module to Topology Control Algorithm
  =
  = Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
- = Last Change: 2016 Set 23 15:53:04
+ = Last Change: 2017 Feb 21 16:24:40
  = Info: This source contains the module to access text files in julia.
  =============================================================================#
 
@@ -26,8 +26,8 @@ type Conf
     dt::Float32
     ph::Int64
     gamma::Array{Float32, 1}
-    vx_lim::Array{Float32, 1}
-    va_lim::Array{Float32, 1}
+    u_min::Array{Float32, 1}
+    u_max::Array{Float32, 1}
     c_com::UInt8
     c_sec::UInt8
     sigma::Float32
@@ -73,8 +73,8 @@ function read_conf(input)
     output.dt = extract_data("dt:\\s*\\d+\\.?\\d*", "control-setup", file)
     output.ph = extract_data("ph:\\s*\\d+", "control-setup", file)
     output.gamma = extract_data("gamma:(\\s*\\-?\\d+\\.?\\d*(\\s+|\\n)){7}", "control-setup", file)
-    output.vx_lim = extract_data("vx\\_lim:(\\s*\\-?\\d+\\.?\\d*(\\s+|\\n)){2}", "control-setup", file)
-    output.va_lim = extract_data("va\\_lim:(\\s*\\-?\\d+\\.?\\d*(\\s+|\\n)){2}", "control-setup", file)
+    output.u_min = extract_data("u\\_min:(\\s*\\-?\\d+\\.?\\d*(\\s+|\\n)){3}", "control-setup", file)
+    output.u_max = extract_data("u\\_max:(\\s*\\-?\\d+\\.?\\d*(\\s+|\\n)){3}", "control-setup", file)
     output.c_com = extract_data("c\\_com:\\s*\\d+", "control-setup", file)
     output.c_sec = extract_data("c\\_sec:\\s*\\d+", "control-setup", file)
     output.sigma = extract_data("sigma:\\s*\\d+\\.?\\d*", "network-setup", file)
