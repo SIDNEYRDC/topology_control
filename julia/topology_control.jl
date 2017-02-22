@@ -2,7 +2,7 @@
  = Topology Control Algorithm using Consensus and MPC
  =
  = Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
- = Last Change: 2017 Fev 20 18:42:13
+ = Last Change: 2017 Feb 21 18:46:57
  = Info: This code is able to adapts the network topology to RSSI variations
  = and adjust the angle between the robots to reach the best connectivity
  =============================================================================#
@@ -100,11 +100,8 @@ H = zeros(UInt8, cfg.n_bot, cfg.n_bot, cfg.n_iter)
  = Main loop
  =#
 
-# constant matrices to motion control
-const T = tril(ones(cfg.ph, cfg.ph))
-const TI = inv(T)
-const T2 = T^2
-const P = diagm(collect(1 : cfg.ph))
+# start cmc module
+cmc_init(cfg.n_bot, cfg.dt, cfg.ph, cfg.gamma, cfg.u_min, cfg.u_max)
 
 # enable omnet++ interface
 cfg.omnet == 1 ? omnet_interface_init(cfg.n_bot) : 0
@@ -223,32 +220,30 @@ for t = 1 : cfg.n_iter
         end
 
         if t != cfg.n_iter && length(N) > 1
-            # high level motion control
-#=           v[i, :, t + 1], c[i, :, t + 1] = mpc_1st_order(i, A[i, :, t],=#
-                                                               #=H[i, :, t],=#
-                                                               #=D[i, :, t],=#
-                                                               #=S[i, :, t], T,=#
-                                                               #=TI, cfg.n_bot,=#
-                                                               #=cfg.n_ref,=#
-                                                               #=x[:, :, t],=#
-                                                               #=v[:, :, t],=#
-                                                               #=r_com[:, t],=#
-                                                               #=r_cov[:, t],=#
-                                                               #=cfg.dt, cfg.ph,=#
-                                                               #=cfg.gamma,=#
-                                                               #=cfg.phi,=#
-                                                               #=cfg.rssi,=#
-                                                               #=cfg.vx_lim,=#
-                                                               #=cfg.va_lim)=#
+            # solve 1st order connectivity motion control (CMC)
+            v[i, :, t + 1], c[i, :, t + 1] = mpc_1st_order(i, A[i, :, t],
+                                                              H[i, :, t],
+                                                              D[i, :, t],
+                                                              S[i, :, t],
+                                                              cfg.n_ref,
+                                                              x[:, :, t],
+                                                              v[:, :, t],
+                                                              r_cov[:, t],
+                                                              r_com[:, t],
+                                                              cfg.phi,
+                                                              cfg.rssi)
 
-            u[i, :, t + 1] = mpc_2nd_order(i, cfg.n_bot, cfg.dt, cfg.ph, x[:, :, t],
-                             v[:, :, t], u[:, :, t], A[i, :, t], H[i, :, t], D[i, :, t],
-                             S[i, :, t], T, TI, T2, P, r_com[:, t], r_cov[:, t], cfg.gamma, [-1 -1 -1], [1 1 1])
+#=            # solve 2nd order connectivity motion control (CMC)=#
+            #=u[i, :, t + 1] = mpc_2nd_order(i, x[:, :, t], v[:, :, t], u[:, :, t],=#
+                                           #=A[i, :, t], H[i, :, t], D[i, :, t],=#
+                                           #=S[i, :, t], r_cov[:, t], r_com[:, t])=#
 
-            v[i, :, t + 1] =  v[i, :, t] + u[i, :, t + 1]*cfg.dt
+            #=# integrate the velocity=#
+            #=v[i, :, t + 1] =  v[i, :, t] + u[i, :, t + 1]*cfg.dt=#
 
-            # upgrade the position
+            # integrate the position
             x[i, :, t + 1] = x[i, :, t] + v[i, :, t + 1]*cfg.dt
+
         elseif t != cfg.n_iter
             # keep the older position if there are no neighbors
             x[i, :, t + 1] = x[i, :, t]
@@ -279,6 +274,7 @@ write(file, "rssi_lim", cfg.rssi_lim)
 write(file, "R", R)
 write(file, "x_data", x)
 write(file, "v_data", v)
+write(file, "u_data", u)
 write(file, "r_com", r_com)
 write(file, "r_cov", r_cov)
 write(file, "A_data", max(A[:, 1 : cfg.n_bot, :], H))

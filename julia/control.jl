@@ -2,7 +2,7 @@
  = Control Module to Topology Control Algorithm in Julia
  =
  = Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
- = Last Change: 2017 Fev 20 19:00:52
+ = Last Change: 2017 Feb 21 18:21:06
  = Info: This file contains the motion control algorithms used in the topology
  = control algorithm.
  =============================================================================#
@@ -13,7 +13,28 @@ using Convex    # cvx interface to solve convex problems
 using Gurobi    # to use Gurobi as optimization solver
 
 # public functions
-export #=mpc_1st_order, =#mpc_2nd_order
+export cmc_init, mpc_1st_order, mpc_2nd_order
+
+#
+#=
+ = Connectivity Motion Control initialization
+ = Info: Starts the constant parameters used by the cmc controllers
+ =#
+function cmc_init(in_n, in_dk, in_p, in_gamma, in_u_min, in_u_max)
+    # set global mpc parameters
+    global const n = in_n
+    global const dk = in_dk
+    global const p = in_p
+    global const gamma = in_gamma
+    global const u_min = in_u_min
+    global const u_max = in_u_max
+
+    # constant matrices to motion control
+    global const T = tril(ones(p, p))
+    global const TI = inv(T)
+    global const T2 = T^2
+    global const P = diagm(collect(1 : p))
+end
 
 #
 #=
@@ -26,7 +47,7 @@ export #=mpc_1st_order, =#mpc_2nd_order
  = array to the neighborhood of i, h is the control step time, p is the
  = prediction horizon to the MPC and gamma is a weight array to MPC.
  =#
-#=function mpc_1st_order(i, Ai, Hi, Di, Si, T, TI, n_bot, n_ref, x, v, r_com, r_cov, dk, p, gamma, phi, RSSI_SENS, vxl, val)
+function mpc_1st_order(i, Ai, Hi, Di, Si, n_ref, x, v, r_cov, r_com, phi, RSSI_SENS)
     # auxiliary matrices definition
     Gixy = zeros(p, p)
     Githeta = zeros(p, p)
@@ -38,10 +59,10 @@ export #=mpc_1st_order, =#mpc_2nd_order
     Vi0[1, :] = v[i, :]
 
     # get the 1-hop neighbours of i
-    N1 = find(Ai[1 : n_bot])
+    N1 = find(Ai[1 : n])
 
     # get the real and virtual neighbours of i
-    N2 = find(max(Ai[1 : n_bot], Hi))
+    N2 = find(max(Ai[1 : n], Hi))
 
     # find the centroid to the robot i and its neighbors
     ci = [sum(x[[i; N1], 1])/(length(N1) + 1); sum(x[[i; N1], 2])/(length(N1) + 1)]
@@ -70,16 +91,16 @@ export #=mpc_1st_order, =#mpc_2nd_order
         psi_ij = Ai[j] + phi_ij
 
         # fill auxiliary matrices
-        Gixy = Gixy + T'*dk*dk*psi_ij*gamma[1]/r_com[j]*T + phi_ij*gamma[2]/vxl[2] + (psi_ij - Hi[j])*gamma[3]/vxl[2] + T'*dk*dk*psi_ij*gamma[7]*T
+        Gixy = Gixy + T'*dk*dk*psi_ij*gamma[1]/r_com[j]*T + phi_ij*gamma[2]/2*u_max[1] + (psi_ij - Hi[j])*gamma[3]/u_max[1] + T'*dk*dk*psi_ij*gamma[7]*T
         Githeta = Githeta + T'*dk*dk*psi_ij*gamma[1]*T
-        fix = fix + (Xi[:, 1] - Xd[:, 1])'*dk*psi_ij*gamma[1]/r_com[j]*T + Vj[:, 1]'*phi_ij*gamma[2]/vxl[2] - Vj[:, 1]'*(psi_ij - Hi[j])*gamma[3]/vxl[2] - Sij'*dk*psi_ij*gamma[7]*T
-        fiy = fiy + (Xi[:, 2] - Xd[:, 2])'*dk*psi_ij*gamma[1]/r_com[j]*T + Vj[:, 2]'*phi_ij*gamma[2]/vxl[2] - Vj[:, 2]'*(psi_ij - Hi[j])*gamma[3]/vxl[2] - Sij'*dk*psi_ij*gamma[7]*T
+        fix = fix + (Xi[:, 1] - Xd[:, 1])'*dk*psi_ij*gamma[1]/r_com[j]*T + Vj[:, 1]'*phi_ij*gamma[2]/2*u_max[1] - Vj[:, 1]'*(psi_ij - Hi[j])*gamma[3]/u_max[1] - Sij'*dk*psi_ij*gamma[7]*T
+        fiy = fiy + (Xi[:, 2] - Xd[:, 2])'*dk*psi_ij*gamma[1]/r_com[j]*T + Vj[:, 2]'*phi_ij*gamma[2]/2*u_max[2] - Vj[:, 2]'*(psi_ij - Hi[j])*gamma[3]/u_max[2] - Sij'*dk*psi_ij*gamma[7]*T
         fitheta = fitheta + (Xi[:, 3] - Xd[:, 3])'*dk*psi_ij*gamma[1]*T
     end
 
     # fill the auxiliary matrices for the references
     if n_ref > 0
-        for r = n_bot + 1 : n_bot + n_ref
+        for r = n + 1 : n + n_ref
             # auxiliary vector to each reference
             Xr = repmat(x[r, :]', p, 1)
             Vr = repmat(v[r, :]', p, 1)
@@ -91,13 +112,11 @@ export #=mpc_1st_order, =#mpc_2nd_order
     end
 
     # fill auxiliary matrices
-    Gixy = Gixy + TI'*gamma[6]/vxl[2]*TI
+    Gixy = Gixy + TI'*gamma[6]/u_max[1]*TI
     Githeta = Githeta + TI'*gamma[6]*TI
-    fix = fix - Vi0[:, 1]'*gamma[6]/vxl[2]*TI
-    fiy = fiy - Vi0[:, 2]'*gamma[6]/vxl[2]*TI
+    fix = fix - Vi0[:, 1]'*gamma[6]/u_max[1]*TI
+    fiy = fiy - Vi0[:, 2]'*gamma[6]/u_max[2]*TI
     fitheta = fitheta - Vi0[:, 3]'*gamma[6]*TI
-
-    #=println([Gixy zeros(p, p) zeros(p, p); zeros(p, p) Gixy zeros(p, p); zeros(p, p) zeros(p, p) Githeta])=#
 
     # declare optimization problem variables
     Ux = Convex.Variable(p)
@@ -108,12 +127,12 @@ export #=mpc_1st_order, =#mpc_2nd_order
     problem = minimize(
         (1/2)*Convex.quadform([Ux; Uy; Utheta], [Gixy zeros(p, p) zeros(p, p); zeros(p, p) Gixy zeros(p, p); zeros(p, p) zeros(p, p) Githeta]) + [fix fiy fitheta]*[Ux; Uy; Utheta],
         # saturation constraints
-        Ux >= fill(vxl[1], p),
-        Uy >= fill(vxl[1], p),
-        Utheta >= fill(val[1], p),
-        Ux <= fill(vxl[2], p),
-        Uy <= fill(vxl[2], p),
-        Utheta <= fill(val[2], p)
+        Ux >= fill(u_min[1], p),
+        Uy >= fill(u_min[2], p),
+        Utheta >= fill(u_min[3], p),
+        Ux <= fill(u_max[1], p),
+        Uy <= fill(u_max[2], p),
+        Utheta <= fill(u_max[3], p)
     )
 
     # maximum distance between neighbours constraint
@@ -132,15 +151,12 @@ export #=mpc_1st_order, =#mpc_2nd_order
     end
 end
 
-end =#
-
 #
 #=
- =
+ = Second Order MPC to motion control
+ = Info: Move robots with 2nd order dynamics using MPC  algorithm
  =#
-
-#= second order mpc control =#
-function mpc_2nd_order(i, n, dk, p, x, v, u, Ai, Hi, Di, Si, T, TI, T2, P, r_com, r_cov, gamma, u_min, u_max)
+function mpc_2nd_order(i, x, v, u, Ai, Hi, Di, Si, r_cov, r_com)
     # auxiliary matrices definition
     Hixy = zeros(p, p)              # Hessian matrix to x and y coordinates
     Hitheta = zeros(p, p)           # Hessian matrix to yaw angle
