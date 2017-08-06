@@ -2,7 +2,7 @@
 % Draw Robot Function
 %
 % Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
-% Last Change: 2016 Jun 09 23:10:32
+% Last Change: 2017 Mar 02 10:22:55
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function draw_robot(x, theta, length, varargin)
@@ -10,8 +10,8 @@ function draw_robot(x, theta, length, varargin)
 % draw_robot() draw a triangle robot shape centered in a point x
 %
 % draw_robot(x, theta, length) draw the robot with default parameters
-% draw_robot(x, theta, length, RobotLabel, LineColor...) draw the robot with
-% extra parameters
+% draw_robot(x, theta, length, RobotShape, RobotLabel, LineColor...) draw the
+% robot with extra parameters
 %
 % Input arguments:
 % ----------------------
@@ -22,7 +22,9 @@ function draw_robot(x, theta, length, varargin)
 % Optional parameters (passed as parameter/value pairs):
 % ------------------------------------------------------
 %
-% 'RobotLabel'       :   Name to be printed into the robot's shape
+% 'RobotShape'      :   Shape of the robot
+%                       default: 't' (triangular)
+% 'RobotLabel'      :   Name to be printed into the robot's shape
 %                       default: ''
 % 'FillColor'       :   Colour of the shape (vector of colour or char)
 %                       default: 'w'
@@ -50,10 +52,12 @@ elseif ~exist('length', 'var')
 end
 
 % extra parameter name
-properties = {'RobotLabel', ...
+properties = {'RobotShape', ...
+              'RobotLabel', ...
               'FillColor'};
 
 % default values
+values.RobotShape       = 't';
 values.RobotLabel       = '';
 values.FillColor        = 'w';
 
@@ -72,23 +76,35 @@ for i = 1 : size(given_property, 2)
     end
 end
 
-% rotation matrix
-rot = [cos(theta) -sin(theta); sin(theta) cos(theta)];
+if values.RobotShape == 't'
+    % rotation matrix
+    rot = [cos(theta) -sin(theta); sin(theta) cos(theta)];
 
-% axis x length
-b = 2/7*length;
+    % axis x length
+    b = 2/7*length;
 
-% robot shape points
-x1 = rot*[0; 2/3*length];
-x2 = rot*[b; - length/3];
-x3 = rot*[- b; - length/3];
+    % robot shape points
+    x1 = rot*[0; 2/3*length];
+    x2 = rot*[b; - length/3];
+    x3 = rot*[- b; - length/3];
+
+    % plot robot shape
+    %plot([x1(1) x2(1) x3(1) x1(1)], [x1(2) x2(2) x3(2) x1(2)], 'Color', 'k');
+    fill(x(1) + [x1(1) x2(1) x3(1)], x(2) + [x1(2) x2(2) x3(2)], values.FillColor);
+
+elseif values.RobotShape == 'c'
+    % generate arcs segments of a circle
+    a = linspace(0, 2*pi);
+
+    % circle radius
+    r = 2/7*length;
+
+    % plot a circle centered at x
+    fill(x(1) + r*cos(a), x(2) + r*sin(a), values.FillColor);
+end
 
 % keep the figure
 hold on;
-
-% plot robot shape
-%plot([x1(1) x2(1) x3(1) x1(1)], [x1(2) x2(2) x3(2) x1(2)], 'Color', 'k');
-fill(x(1) + [x1(1) x2(1) x3(1)], x(2) + [x1(2) x2(2) x3(2)], values.FillColor);
 
 % plot robot label
 text(x(1), x(2), values.RobotLabel, 'HorizontalAlignment', 'center', 'VerticalAlignment', 'middle');
