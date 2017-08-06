@@ -2,7 +2,7 @@
 % Robot's Position Plotter
 %
 % Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
-% Last Change: 2017 Fev 13 18:14:02
+% Last Change: 2017 Jul 31 14:16:39
 % Info: This code is able to plot the robot's positions from the topology
 % control algorithm
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -22,7 +22,7 @@ LINE_WIDTH = 1;
 % 3: save .avi
 SAVE_OPTIONS = 0;
 
-% sime for each iteration
+% time for each iteration
 LOOP_TIME = 0;
 
 % show communication and coverage radii
@@ -169,14 +169,17 @@ for t = 1 : 1 : N
         plot(xpose(:), ypose(:), 'g-');
 
         % plot the robot's name and shape
-        draw_robot(xi, x_data(i, 3, t), ROBOT_LENGTH, 'RobotLabel', num2str(i), 'FillColor', 'w');
+        draw_robot(xi, x_data(i, 3, t), ROBOT_LENGTH, 'RobotShape', 'c', 'RobotLabel', num2str(i), 'FillColor', 'w');
 
     end
 
-    % configure plot properties
-    set(gca, 'FontName', 'Helvetica');
-    xlabel('x [m]');
-    ylabel('y [m]');
+    % configure text font and size (use 'listfonts' to list all known fonts)
+    set(findall(gcf, '-property', 'FontName'), 'FontName', 'Times New Roman')
+    set(findall(gcf, '-property', 'FontSize'), 'FontSize', 12)
+
+    % set axis labels
+    xlabel('x (m)');
+    ylabel('y (m)');
 
     % set axis configurations
     axis([xmin xmax ymin ymax]);
@@ -199,10 +202,17 @@ for t = 1 : 1 : N
 
     % save file options
     if SAVE_OPTIONS == 1
-        imgname = strcat('pose-', int2str(t), '.pdf');
-        print('-dpdf', imgname);
+        % set print size
+        fig = gcf;
+        fig.PaperSize = [3 3];
+
+        imgname = strcat('test2_pose-', int2str(t));
+        print(fig, '-dpdf', '-fillpage', imgname);
+        %print2eps(imgname, fig);
+        %eps2pdf(strcat(imgname, '.eps'), strcat(imgname, '.pdf'));
+        %delete(strcat(imgname, '.eps'));
     elseif SAVE_OPTIONS == 2
-        imgname = strcat('pose-', int2str(t), '.eps');
+        imgname = strcat('pose-', int2str(t));
         print('-depsc2', '-tiff', imgname);
     end
 

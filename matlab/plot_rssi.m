@@ -2,7 +2,7 @@
 % RSSI Readings plotter
 %
 % Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
-% Last Change: 2016 Jun 27 17:28:27
+% Last Change: 2017 Jul 25 13:58:13
 % Info: This code is able to plot the RSSI readings from the Communication
 % Topology Control Algorithm.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -15,46 +15,55 @@
 % 2: save .eps
 SAVE_OPTIONS = 1;
 
-% select the kind of plot
-% 0: x = log(dij)   y = RSSI
-% 1: x = time       y = RSSI
-PLOT_TYPE = 0;
-
 %% MAIN CODE %%
 
-% array of colors
-colors = hsv(single(n*n));
+N = single(N);
 
-hold on
+for k = [30 90 260 350]
 
-N = 350;
+    hold on;
 
-s = S_data(1, 3, 1:N);
+    s = S_data(1, 2, 1:k);
+    sf = Sf_data(1, 2, 1:k);
 
-%h1 = plot(1:N, s(:), '-r');
-h2 = plot(1:N, s(:), '-b');
+    t = 0:h:(k - 1)*h;
 
-h3 = plot(1:N, repmat(s_min, 1, length(1:N)), 'Col', 'k', 'LineWidth', 1, 'LineStyle', '--');
-%h4 = plot(repmat(80, 1, length(-26:-13)), -26:-13, '-.k');
-%h5 = plot(repmat(250, 1, length(-26:-13)), -26:-13, '-.k');
+    h1 = plot(t, s(:), 'Col', 'k', 'LineWidth', 1, 'LineStyle', '-');
+    %h2 = plot(t, sf(:), 'Col', 'k', 'LineWidth', 1, 'LineStyle', '-');
+    h5 = plot(0:h:(N - 1)*h, repmat(rssi_lim, 1, length(1:N)), '--k');
 
-legend([h1, h2, h3], {'no-RSSI sensing', 'RSSI sensing', 'RSSI threshold'}, 'Location', 'southeast');
+    if k == 10
+        %legend([h1, h2, h5], {'RSSI raw', 'RSSI filtered', 'RSSI threshold'}, 'Location', 'southeast');
+    end
 
-% set axis limits
-xlim([1 N]);
-%ylim([-26 -13])
+    % configure text font and size (use 'listfonts' to list all known fonts)
+    set(findall(gcf, '-property', 'FontName'), 'FontName', 'Times New Roman')
+    set(findall(gcf, '-property', 'FontSize'), 'FontSize', 16)
 
-xlabel('iterations');
-ylabel('RSSI values to link (1,3) [dBm]')
-grid on;
-box on;
+    % plot options
+    xlabel('Time (s)');
+    ylabel('RSSI values (dBm)')
+    xlim([0 35])
+    ylim([-26 -12])
+    grid on;
+    box on;
 
-% save image plot
-if SAVE_OPTIONS == 1
-    imgname = strcat('rssi-',int2str(n),'-',int2str(N),'.pdf');
-    print('-dpdf',imgname);
-elseif SAVE_OPTIONS == 2
-    imgname = strcat('rssi-',int2str(n),'-',int2str(N),'.eps');
-    print('-depsc2','-tiff',imgname);
+    % save image plot
+    if SAVE_OPTIONS == 1
+        % set print size
+        fig = gcf;
+        fig.PaperSize = [4 3.3];
+
+        imgname = strcat('test2_rssi-', int2str(k), '.pdf');
+        print(fig, '-dpdf', '-fillpage', imgname);
+    elseif SAVE_OPTIONS == 2
+        imgname = strcat('rssi-',int2str(n),'-',int2str(N),'.eps');
+        print('-depsc2','-tiff',imgname);
+    end
+
+    pause(1)
+
+    %clf
+
 end
 

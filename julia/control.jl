@@ -2,7 +2,7 @@
  = Control Module to Topology Control Algorithm in Julia
  =
  = Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
- = Last Change: 2017 Feb 21 18:21:06
+ = Last Change: 2017 Feb 27 22:47:03
  = Info: This file contains the motion control algorithms used in the topology
  = control algorithm.
  =============================================================================#
@@ -33,6 +33,7 @@ function cmc_init(in_n, in_dk, in_p, in_gamma, in_u_min, in_u_max)
     global const T = tril(ones(p, p))
     global const TI = inv(T)
     global const T2 = T^2
+    global const I = eye(p)
     global const P = diagm(collect(1 : p))
 end
 
@@ -90,8 +91,10 @@ function mpc_1st_order(i, Ai, Hi, Di, Si, n_ref, x, v, r_cov, r_com, phi, RSSI_S
         phi_ij = (1 - Ai[j])*Hi[j]
         psi_ij = Ai[j] + phi_ij
 
+        #=println("i=$(i) j=$(j) a_ij=$(Ai[j]) α_ij=$(Hi[j]) φ_ij=$(phi_ij)")=#
+
         # fill auxiliary matrices
-        Gixy = Gixy + T'*dk*dk*psi_ij*gamma[1]/r_com[j]*T + phi_ij*gamma[2]/2*u_max[1] + (psi_ij - Hi[j])*gamma[3]/u_max[1] + T'*dk*dk*psi_ij*gamma[7]*T
+        Gixy = Gixy + T'*dk*dk*psi_ij*gamma[1]/r_com[j]*T + phi_ij*gamma[2]/2*u_max[1]*I + (psi_ij - Hi[j])*gamma[3]/u_max[1]*I + T'*dk*dk*psi_ij*gamma[7]*T
         Githeta = Githeta + T'*dk*dk*psi_ij*gamma[1]*T
         fix = fix + (Xi[:, 1] - Xd[:, 1])'*dk*psi_ij*gamma[1]/r_com[j]*T + Vj[:, 1]'*phi_ij*gamma[2]/2*u_max[1] - Vj[:, 1]'*(psi_ij - Hi[j])*gamma[3]/u_max[1] - Sij'*dk*psi_ij*gamma[7]*T
         fiy = fiy + (Xi[:, 2] - Xd[:, 2])'*dk*psi_ij*gamma[1]/r_com[j]*T + Vj[:, 2]'*phi_ij*gamma[2]/2*u_max[2] - Vj[:, 2]'*(psi_ij - Hi[j])*gamma[3]/u_max[2] - Sij'*dk*psi_ij*gamma[7]*T

@@ -2,7 +2,7 @@
  = Topology Control Algorithm using Consensus and MPC
  =
  = Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
- = Last Change: 2017 Feb 21 18:46:57
+ = Last Change: 2017 Jul 31 14:22:15
  = Info: This code is able to adapts the network topology to RSSI variations
  = and adjust the angle between the robots to reach the best connectivity
  =============================================================================#
@@ -34,7 +34,7 @@ if length(ARGS) < 1
 end
 
 # read configuration file
-cfg = read_conf(ARGS[1])
+cfg = read_conf(string("../conf/", ARGS[1]))
 
 # initial positions
 # x(i | n_bot + r, [x y θ], t)
@@ -82,6 +82,10 @@ D = zeros(cfg.n_bot, cfg.n_bot, cfg.n_iter);
 # S(i, j, t)
 S = fill(-90.0, cfg.n_bot, cfg.n_bot, cfg.n_iter)
 
+# RSSI filtered readings (dBm)
+# Sf(i, j, t)
+Sf = zeros(cfg.n_bot, cfg.n_bot, cfg.n_iter)
+
 # zero-mean white Gaussian noise matrix
 # G(i, j, t)
 srand(1); const G = cfg.sigma*randn(cfg.n_bot, cfg.n_bot, cfg.n_iter)
@@ -119,11 +123,33 @@ for t = 1 : cfg.n_iter
                 # euclidean distance between i and j
                 D[i, j, t] = D[j, i, t] = norm(x[i, 1 : 2, t] - x[j, 1 : 2, t])
 
-                #=i == 1 && t > 80 && t < 250 ? R[i, j] = R[j, i] = -5 : R[i, j] = R[j, i] = 0=#
+                i == 1 && t > 80 && t < 250 ? R[i, j] = R[j, i] = -5 : R[i, j] = R[j, i] = 0
                 # fill RSSI matrix using the model: Sij = - 10 ∙ Φ ∙ log(dij) + C
                 # can be found in: doi.org/10.1109/ICIT.2013.6505900
                 S[i, j, t] = - 10*cfg.phi*log10(D[i, j, t]) + R[i, j] + G[i, j, t]*cfg.rssi_noise
                 S[j, i, t] = - 10*cfg.phi*log10(D[i, j, t]) + R[j, i] + G[j, i, t]*cfg.rssi_noise
+
+                #=
+                 = Filter to RSSI readings (exponential smoothing, must be improved)
+                 =#
+                # filter factor
+                ff = 5
+
+                # RSSI readings filter
+                if t >= ff
+                    alpha = 0.2
+
+                    for tt = 0 : t - 1
+                        Sf[i, j, t] += alpha*(1 - alpha)^tt*S[i, j, t-tt]
+                        Sf[j, i, t] += alpha*(1 - alpha)^tt*S[j, i, t-tt]
+                    end
+
+                    Sf[i, j, t] += (1 - alpha)^t*S[i, j, 1]
+                    Sf[j, i, t] += (1 - alpha)^t*S[j, i, 1]
+                else
+                    Sf[i, j, t] = S[i, j, t]
+                    Sf[j, i, t] = S[j, i, t]
+                end
 
                 # update adjacency matrix
                 if D[i, j, t] <= r_com[j, t] && D[i, j, t] <= r_com[i, t]
@@ -202,17 +228,26 @@ for t = 1 : cfg.n_iter
             # get the neighbourhood from i (2-hop)
             global N = neighbourhood(A[:, 1 : cfg.n_bot, t], i, 2)
 
-            if length(N) > 2
-                # reduce the distance matrix to i's neighbourhood and get
-                # the Hamiltonian cycle from TSP's solution
-                H_i = tsp(matreduce(D[:, :, t], N))
+            # calculate the TSP's solution according with the information scope
+            # local knowledge (2-hop)
+            if cfg.info_scope == 0
+                if length(N) > 2
+                    # reduce the distance matrix to i's neighbourhood and get
+                    # the Hamiltonian cycle from TSP's solution
+                    H_i = tsp(matreduce(D[:, :, t], N))
 
-                # fill the Hamiltonian's cycle matrix with H_i line
-                for j = 1 : length(N)
-                    H[i, N[j], t] = H_i[1, j]
+                    # fill the Hamiltonian's cycle matrix with H_i line
+                    for j = 1 : length(N)
+                        H[i, N[j], t] = H_i[1, j]
+                    end
+                else
+                    H[i, :, t] = zeros(1, cfg.n_bot)
                 end
-            else
-                H[i, :, t] = zeros(1, cfg.n_bot)
+
+            # global knowledge
+            elseif cfg.info_scope == 1
+                H_i = tsp(D[:, :, t])
+                H[:, :, t] = H_i
             end
         else
             # keep the earlier Hamiltonian matrix state to the actual iteration
@@ -224,7 +259,7 @@ for t = 1 : cfg.n_iter
             v[i, :, t + 1], c[i, :, t + 1] = mpc_1st_order(i, A[i, :, t],
                                                               H[i, :, t],
                                                               D[i, :, t],
-                                                              S[i, :, t],
+                                                              Sf[i, :, t],
                                                               cfg.n_ref,
                                                               x[:, :, t],
                                                               v[:, :, t],
@@ -233,12 +268,12 @@ for t = 1 : cfg.n_iter
                                                               cfg.phi,
                                                               cfg.rssi)
 
-#=            # solve 2nd order connectivity motion control (CMC)=#
-            #=u[i, :, t + 1] = mpc_2nd_order(i, x[:, :, t], v[:, :, t], u[:, :, t],=#
+            # solve 2nd order connectivity motion control (CMC)
+#=            u[i, :, t + 1] = mpc_2nd_order(i, x[:, :, t], v[:, :, t], u[:, :, t],=#
                                            #=A[i, :, t], H[i, :, t], D[i, :, t],=#
                                            #=S[i, :, t], r_cov[:, t], r_com[:, t])=#
 
-            #=# integrate the velocity=#
+            # integrate the velocity
             #=v[i, :, t + 1] =  v[i, :, t] + u[i, :, t + 1]*cfg.dt=#
 
             # integrate the position
@@ -280,6 +315,7 @@ write(file, "r_cov", r_cov)
 write(file, "A_data", max(A[:, 1 : cfg.n_bot, :], H))
 write(file, "H_data", H)
 write(file, "S_data", S)
+write(file, "Sf_data", Sf)
 write(file, "G_data", G)
 write(file, "D_data", D)
 write(file, "c_data", c)

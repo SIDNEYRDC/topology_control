@@ -4,7 +4,7 @@
 ###############################################################################
 # Random Geometric Graph Generator
 # Written by SIDNEY RDC using NetworkX library.
-# Last Change: 2017 Feb 21 17:39:10
+# Last Change: 2017 Jul 27 21:07:00
 ###############################################################################
 
 import argparse
@@ -13,6 +13,9 @@ from scipy import spatial
 import networkx as nx
 import matplotlib.pyplot as plt
 import math, random, sys
+
+# print all elements of an array
+np.set_printoptions(edgeitems=3, infstr='inf', linewidth=1000, nanstr='nan', precision=8, suppress=False, threshold='inf', formatter=None)
 
 # generate a random geometric graph in a determined area
 def random_geometric_graph(n, radius, size=1, ne=None, dim=2, pos=None):
@@ -53,6 +56,8 @@ if __name__ == "__main__":
     parser.add_argument('-s', '--size', dest='size', type=float, required=False, help='Size area of random generate')
     parser.add_argument('-e', '--edges', dest='edges', type=int, required=False, help='Number of edges on the graph')
     parser.add_argument('-f', '--factor', dest='scale', type=int, required=False, help='Scale factor of size')
+    parser.add_argument('-A', '--adjacency', dest='adjacency', type=bool, required=False, help='Generates the graph adjacency matrix')
+    parser.add_argument('-o', '--output', dest='output', type=str, required=False, help='Output configuration file')
     args = parser.parse_args()
 
     # Verify the scale factor
@@ -75,14 +80,17 @@ if __name__ == "__main__":
     # Generate a connected graph
     print 'Generating a connected graph...'
     while True:
-        G = random_geometric_graph(args.nodes,args.radius,size,args.edges)
-        pos = nx.get_node_attributes(G,'pos')
+        G = random_geometric_graph(args.nodes, args.radius, size, args.edges)
+        pos = nx.get_node_attributes(G, 'pos')
         if nx.is_connected(G) == True:
             print 'is connected: %s' % (nx.is_connected(G))
             break
 
     # Configuration output file
-    f = open('topology.conf','w')
+    if args.output != None:
+        f = open(args.output, 'w')
+    else:
+        f = open('topology.conf', 'w')
 
     # Initial headers
     f.write('# Topology configuration file\n')
@@ -180,7 +188,7 @@ if __name__ == "__main__":
 
     # Write positions on archive file
     for n in pos:
-        f.write('%d: %f %f 0\n' % (n+1,pos[n][0]*scale,pos[n][1]*scale))
+        f.write('%d: %f %f 0\n' % (n+1, pos[n][0]*scale, pos[n][1]*scale))
 
     # Headers for velocity
     f.write('\n###############################################################################')
@@ -194,7 +202,15 @@ if __name__ == "__main__":
 
     # Write radius on archive file
     for n in xrange(0, args.nodes):
-        f.write('%d: 0.0 %.1f %.1f\n' % (n+1,(args.radius*scale*0.9)/2,args.radius*scale))
+        f.write('%d: 0.0 %.1f %.1f\n' % (n+1, (args.radius*scale*0.9)/2, args.radius*scale))
+
+    # Write the graph adjacency matrix
+    if args.adjacency == True:
+        # Get graph adjacency matrix
+        A = nx.adjacency_matrix(G)
+        f.write('\n###############################################################################')
+        f.write('\n[adjacency-matrix]\n')
+        f.write('%s\n' % np.array2string(np.array(A.todense())))
 
     # Headers to external robots
     f.write('\n###############################################################################')
@@ -219,7 +235,7 @@ if __name__ == "__main__":
     nx.draw(G,pos)
 
     # Draw labels
-    nx.draw_networkx_labels(G,pos,font_size=10,font_family='sans-serif')
+    nx.draw_networkx_labels(G, pos, font_size=10, font_family='CMU Serif')
 
     # Draw nodes
     nx.draw_networkx_nodes(G,pos,node_color='#E0E0E0')
