@@ -2,7 +2,7 @@
  = File Module to Topology Control Algorithm
  =
  = Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
- = Last Change: 2017 Feb 21 16:24:40
+ = Last Change: 2017 Jul 31 13:20:16
  = Info: This source contains the module to access text files in julia.
  =============================================================================#
 
@@ -23,6 +23,7 @@ type Conf
     n_ref::Int64
     dc::Int64
     ros::UInt8
+    info_scope::UInt8
     dt::Float32
     ph::Int64
     gamma::Array{Float32, 1}
@@ -62,7 +63,7 @@ function read_conf(input)
     file = replace(replace(string(split(file, r"\#.*\n")), "\",\"", ""), "\\n", '\n')
 
     # the output file
-    output = Conf(0, 0, 0, 0, 0, 0, 0, [0], [0], [0], 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, [0 0], [0 0], [0], [0], [0], [0])
+    output = Conf(0, 0, 0, 0, 0, 0, 0, 0, [0], [0], [0], 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, [0 0], [0 0], [0], [0], [0], [0])
 
     # extract data
     output.n_iter = extract_data("n\\_iter:\\s*\\d+", "simulation-setup", file)
@@ -70,6 +71,7 @@ function read_conf(input)
     output.n_ref = extract_data("n\\_ref:\\s*\\d+", "simulation-setup", file)
     output.dc = extract_data("dc:\\s*\\d+", "simulation-setup", file)
     output.ros = extract_data("ros:\\s*\\d+", "simulation-setup", file)
+    output.info_scope = extract_data("info_scope:\\s*\\d+", "simulation-setup", file)
     output.dt = extract_data("dt:\\s*\\d+\\.?\\d*", "control-setup", file)
     output.ph = extract_data("ph:\\s*\\d+", "control-setup", file)
     output.gamma = extract_data("gamma:(\\s*\\-?\\d+\\.?\\d*(\\s+|\\n)){7}", "control-setup", file)
