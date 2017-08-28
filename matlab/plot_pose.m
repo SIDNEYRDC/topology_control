@@ -169,7 +169,7 @@ for t = 1 : 1 : N
         plot(xpose(:), ypose(:), 'g-');
 
         % plot the robot's name and shape
-        draw_robot(xi, x_data(i, 3, t), ROBOT_LENGTH, 'RobotShape', 'c', 'RobotLabel', num2str(i), 'FillColor', 'w');
+        draw_robot(xi, x_data(i, 3, t), ROBOT_LENGTH, 'RobotShape', 't', 'RobotLabel', num2str(i), 'FillColor', 'w');
 
     end
 

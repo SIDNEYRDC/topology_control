@@ -81,16 +81,20 @@ if values.RobotShape == 't'
     rot = [cos(theta) -sin(theta); sin(theta) cos(theta)];
 
     % axis x length
-    b = 2/7*length;
-
-    % robot shape points
-    x1 = rot*[0; 2/3*length];
-    x2 = rot*[b; - length/3];
-    x3 = rot*[- b; - length/3];
+%     b = 2/7*length;
+% 
+%     % robot shape points
+%     x1 = rot*[0; 2/3*length]
+%     x2 = rot*[b; - length/3]
+%     x3 = rot*[- b; - length/3]
+    x1 = rot*[-length/2; -length/2];
+    x2 = rot*[-length/3; 0];
+    x3 = rot*[-length/2; length/2];
+    x4 = rot*[length/2; 0];
 
     % plot robot shape
     %plot([x1(1) x2(1) x3(1) x1(1)], [x1(2) x2(2) x3(2) x1(2)], 'Color', 'k');
-    fill(x(1) + [x1(1) x2(1) x3(1)], x(2) + [x1(2) x2(2) x3(2)], values.FillColor);
+    fill(x(1) + [x1(1) x2(1) x3(1) x4(1)], x(2) + [x1(2) x2(2) x3(2) x4(2)], values.FillColor);
 
 elseif values.RobotShape == 'c'
     % generate arcs segments of a circle
