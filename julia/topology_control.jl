@@ -1,8 +1,10 @@
+#!/usr/bin/env julia
+
 #==============================================================================
  = Topology Control Algorithm using Consensus and MPC
  =
  = Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
- = Last Change: 2017 Jul 31 14:22:15
+ = Last Change: 2017 Ago 06 17:21:32
  = Info: This code is able to adapts the network topology to RSSI variations
  = and adjust the angle between the robots to reach the best connectivity
  =============================================================================#

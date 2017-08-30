@@ -40,9 +40,9 @@ function draw_robot(x, theta, length, varargin)
 if ~exist('x', 'var')
     disp('Not input point.')
     return
-%elseif length(x) ~= 2
-    %disp('The origin point must be a 2D coordinate.')
-    %return
+elseif ~xor(size(x, 1) ~= 2, size(x, 2) ~= 2)
+    disp('The origin point must be a 2D coordinate.')
+    return
 elseif ~exist('theta', 'var')
     disp('Not robot angle inserted.')
     return
