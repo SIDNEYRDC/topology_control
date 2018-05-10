@@ -1,3 +1,5 @@
+#!/usr/bin/env julia
+
 # Install julia dependencies and extra tools
 Pkg.add("MAT")                           # matlab files support
 Pkg.add("Gurobi"); Pkg.build("Gurobi")   # optimization solver
