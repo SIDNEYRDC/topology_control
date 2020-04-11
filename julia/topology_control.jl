@@ -4,7 +4,7 @@
  = Topology Control Algorithm using Consensus and MPC
  =
  = Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
- = Last Change: 2017 Ago 06 17:21:32
+ = Last Change: 2020 Abr 11 14:52:01
  = Info: This code is able to adapts the network topology to RSSI variations
  = and adjust the angle between the robots to reach the best connectivity
  =============================================================================#
@@ -59,6 +59,9 @@ r_com = repmat(cfg.r_com', cfg.n_iter)'
 # initial coverage radius
 # rcov(i, rcov, t)
 r_cov = repmat(cfg.r_cov', cfg.n_iter)'
+
+# initial safety radius
+r_sec = repmat(cfg.r_sec', cfg.n_iter)'
 
 #
 #=
@@ -125,7 +128,8 @@ for t = 1 : cfg.n_iter
                 # euclidean distance between i and j
                 D[i, j, t] = D[j, i, t] = norm(x[i, 1 : 2, t] - x[j, 1 : 2, t])
 
-                i == 1 && t > 80 && t < 250 ? R[i, j] = R[j, i] = -5 : R[i, j] = R[j, i] = 0
+                #=i == 1 && t > 80 && t < 250 ? R[i, j] = R[j, i] = -5 : R[i, j] = R[j, i] = 0=#
+
                 # fill RSSI matrix using the model: Sij = - 10 ∙ Φ ∙ log(dij) + C
                 # can be found in: doi.org/10.1109/ICIT.2013.6505900
                 S[i, j, t] = - 10*cfg.phi*log10(D[i, j, t]) + R[i, j] + G[i, j, t]*cfg.rssi_noise
@@ -265,6 +269,7 @@ for t = 1 : cfg.n_iter
                                                               cfg.n_ref,
                                                               x[:, :, t],
                                                               v[:, :, t],
+                                                              r_sec[:, t],
                                                               r_cov[:, t],
                                                               r_com[:, t],
                                                               cfg.phi,
@@ -302,11 +307,11 @@ toc()
 file = matopen(join(["../matlab/sim", cfg.n_bot, cfg.n_iter, "mat"], "-", "."), "w")
 
 # write data into .mat file
-write(file, "N", cfg.n_iter)
-write(file, "n", cfg.n_bot)
-write(file, "nr", cfg.n_ref)
-write(file, "h", cfg.dt)
-write(file, "p", cfg.ph)
+write(file, "N", Float32(cfg.n_iter))
+write(file, "n", Float32(cfg.n_bot))
+write(file, "nr", Float32(cfg.n_ref))
+write(file, "h", Float32(cfg.dt))
+write(file, "p", Int32(cfg.ph))
 write(file, "rssi_lim", cfg.rssi_lim)
 write(file, "R", R)
 write(file, "x_data", x)
@@ -314,7 +319,7 @@ write(file, "v_data", v)
 write(file, "u_data", u)
 write(file, "r_com", r_com)
 write(file, "r_cov", r_cov)
-write(file, "A_data", max(A[:, 1 : cfg.n_bot, :], H))
+write(file, "A_data", max.(A[:, 1 : cfg.n_bot, :], H))
 write(file, "H_data", H)
 write(file, "S_data", S)
 write(file, "Sf_data", Sf)

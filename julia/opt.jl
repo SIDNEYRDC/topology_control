@@ -2,7 +2,7 @@
  = Optimization Module
  =
  = Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
- = Last Change: 2016 Set 24 17:03:06
+ = Last Change: 2020 Abr 11 14:59:53
  = Info: This file contains the optimization module that is used to solve some
  = problems using mathematic programming and optimization algorithms.
  =============================================================================#
@@ -64,7 +64,7 @@ function tsp(W)
     @constraint(m, xyconstr[i = 2 : n, j = 2 : n, i != j], u[i] - u[j] + n*e[i, j] <= n - 1)
 
     # ensure that there is no value in the main diagonal
-    @constraint(m, xyconstr[i = 1 : n], e[i, i] == 0)
+    @constraint(m, con[i = 1 : n], e[i, i] == 0)
 
     # solve the problem
     status = JuMP.solve(m)

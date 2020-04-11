@@ -2,7 +2,7 @@
  = Control Module to Topology Control Algorithm in Julia
  =
  = Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
- = Last Change: 2017 Feb 27 22:47:03
+ = Last Change: 2020 Abr 11 14:53:49
  = Info: This file contains the motion control algorithms used in the topology
  = control algorithm.
  =============================================================================#
@@ -48,7 +48,7 @@ end
  = array to the neighborhood of i, h is the control step time, p is the
  = prediction horizon to the MPC and gamma is a weight array to MPC.
  =#
-function mpc_1st_order(i, Ai, Hi, Di, Si, n_ref, x, v, r_cov, r_com, phi, RSSI_SENS)
+function mpc_1st_order(i, Ai, Hi, Di, Si, n_ref, x, v, r_sec, r_cov, r_com, phi, RSSI_SENS)
     # auxiliary matrices definition
     Gixy = zeros(p, p)
     Githeta = zeros(p, p)
@@ -63,7 +63,7 @@ function mpc_1st_order(i, Ai, Hi, Di, Si, n_ref, x, v, r_cov, r_com, phi, RSSI_S
     N1 = find(Ai[1 : n])
 
     # get the real and virtual neighbours of i
-    N2 = find(max(Ai[1 : n], Hi))
+    N2 = find(max.(Ai[1 : n], Hi))
 
     # find the centroid to the robot i and its neighbors
     ci = [sum(x[[i; N1], 1])/(length(N1) + 1); sum(x[[i; N1], 2])/(length(N1) + 1)]
