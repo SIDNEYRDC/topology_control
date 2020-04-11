@@ -4,7 +4,7 @@
 ###############################################################################
 # Random Geometric Graph Generator
 # Written by SIDNEY RDC using NetworkX library.
-# Last Change: 2017 Jul 27 21:07:00
+# Last Change: 2019 Nov 27 17:38:57
 ###############################################################################
 
 import argparse
@@ -13,6 +13,7 @@ from scipy import spatial
 import networkx as nx
 import matplotlib.pyplot as plt
 import math, random, sys
+import scipy.io as sio
 
 # print all elements of an array
 np.set_printoptions(edgeitems=3, infstr='inf', linewidth=1000, nanstr='nan', precision=8, suppress=False, threshold='inf', formatter=None)
@@ -58,6 +59,7 @@ if __name__ == "__main__":
     parser.add_argument('-f', '--factor', dest='scale', type=int, required=False, help='Scale factor of size')
     parser.add_argument('-A', '--adjacency', dest='adjacency', type=bool, required=False, help='Generates the graph adjacency matrix')
     parser.add_argument('-o', '--output', dest='output', type=str, required=False, help='Output configuration file')
+    parser.add_argument('-m', '--mat', dest='mat', type=str, required=False, help='Save the output as .mat file')
     args = parser.parse_args()
 
     # Verify the scale factor
@@ -231,6 +233,10 @@ if __name__ == "__main__":
     # Close file
     f.close()
 
+    # Save matfile it is enable
+    if args.mat != None:
+        sio.savemat('topology.mat', mdict={'A': np.array(A.todense()), 'pose': np.array(tuple(pos.values()))})
+
     # Draw graph
     nx.draw(G,pos)
 
@@ -238,7 +244,7 @@ if __name__ == "__main__":
     nx.draw_networkx_labels(G, pos, font_size=10, font_family='CMU Serif')
 
     # Draw nodes
-    nx.draw_networkx_nodes(G,pos,node_color='#E0E0E0')
+    nx.draw_networkx_nodes(G, pos, node_color='#E0E0E0')
 
     # Show and save figure
     plt.savefig("graph.pdf")
