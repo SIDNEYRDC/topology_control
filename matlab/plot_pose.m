@@ -28,7 +28,7 @@ LOOP_TIME = 0;
 % show communication and coverage radii
 % 0: off
 % 1: show
-COM_RAD = 0;
+COM_RAD = 1;
 COV_RAD = 1;
 
 % show velocity directions
