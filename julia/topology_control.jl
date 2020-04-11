@@ -4,15 +4,15 @@
  = Topology Control Algorithm using Consensus and MPC
  =
  = Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
- = Last Change: 2020 Abr 11 14:52:01
+ = Last Change: 2020 Abr 11 17:05:08
  = Info: This code is able to adapts the network topology to RSSI variations
  = and adjust the angle between the robots to reach the best connectivity
  =============================================================================#
 
 # load external files
 include("opt.jl")               # tsp solution
-include("utils.jl")             # auxiliary functions
 include("control.jl")           # motion control algorithms
+include("utils.jl")             # auxiliary functions
 include("network.jl")           # network interface
 include("file.jl")              # external files access
 
@@ -29,14 +29,17 @@ using FILE                      # to read configuration files
  =#
 
 # check the parameter number
-if length(ARGS) < 1
+if !isinteractive() && length(ARGS) < 1
     print_with_color(:red, "ERROR: configuration file expected!\n")
     println("Usage: 'julia topology_control.jl topology.conf'")
     exit(1)
+
+elseif !isinteractive()
+    filename = ARGS[1]
 end
 
 # read configuration file
-cfg = read_conf(string("../conf/", ARGS[1]))
+cfg = read_conf(string("../conf/", filename))
 
 # initial positions
 # x(i | n_bot + r, [x y θ], t)
@@ -269,6 +272,7 @@ for t = 1 : cfg.n_iter
                                                               cfg.n_ref,
                                                               x[:, :, t],
                                                               v[:, :, t],
+                                                              cfg.c_sec,
                                                               r_sec[:, t],
                                                               r_cov[:, t],
                                                               r_com[:, t],

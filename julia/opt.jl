@@ -2,7 +2,7 @@
  = Optimization Module
  =
  = Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
- = Last Change: 2020 Abr 11 14:59:53
+ = Last Change: 2020 Abr 11 15:38:08
  = Info: This file contains the optimization module that is used to solve some
  = problems using mathematic programming and optimization algorithms.
  =============================================================================#
@@ -14,6 +14,9 @@ using Gurobi    # to use Gurobi as optimization solver
 
 # public functions
 export tsp
+
+# global environment variable to gurobi solver
+const GUROBI_ENV = Gurobi.Env()
 
 #
 #=
@@ -43,7 +46,7 @@ function tsp(W)
     end
 
     # define optimization model
-    m = JuMP.Model(solver = GurobiSolver(OutputFlag = 0))
+    m = JuMP.Model(solver = GurobiSolver(OutputFlag = 0, GUROBI_ENV))
 
     # define edges matrix
     @variable(m, e[1 : n, 1 : n] >= 0, Int)

@@ -2,7 +2,7 @@
 % Robot's Position Plotter
 %
 % Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
-% Last Change: 2017 Jul 31 14:16:39
+% Last Change: 2020 Abr 11 15:01:37
 % Info: This code is able to plot the robot's positions from the topology
 % control algorithm
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -28,7 +28,7 @@ LOOP_TIME = 0;
 % show communication and coverage radii
 % 0: off
 % 1: show
-COM_RAD = 1;
+COM_RAD = 0;
 COV_RAD = 1;
 
 % show velocity directions
@@ -92,7 +92,7 @@ ROBOT_LENGTH = 0.06*norm([xmin ymin] - [xmax ymax]);
 SPEED_LENGTH = 0.03*norm([xmin ymin] - [xmax ymax]);
 
 % start position plotting for robots
-for t = 1 : 1 : N
+for t = 1 : 10 : N
     newplot;
     hold on;
 
@@ -169,7 +169,7 @@ for t = 1 : 1 : N
         plot(xpose(:), ypose(:), 'g-');
 
         % plot the robot's name and shape
-        draw_robot(xi, x_data(i, 3, t), ROBOT_LENGTH, 'RobotShape', 't', 'RobotLabel', num2str(i), 'FillColor', 'w');
+        draw_robot(xi, x_data(i, 3, t), ROBOT_LENGTH, 'RobotShape', 'c', 'RobotLabel', num2str(i), 'FillColor', 'w');
 
     end
 
@@ -178,8 +178,8 @@ for t = 1 : 1 : N
     set(findall(gcf, '-property', 'FontSize'), 'FontSize', 12)
 
     % set axis labels
-    xlabel('x (m)');
-    ylabel('y (m)');
+    xlabel('x [m]');
+    ylabel('y [m]');
 
     % set axis configurations
     axis([xmin xmax ymin ymax]);

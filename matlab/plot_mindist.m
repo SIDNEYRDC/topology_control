@@ -1,28 +1,60 @@
 %% Plot the minimum distance between neighbors nodes %%
-%%
 
-% Number of iteractions
-N = size(x_plot,1);
+%% CONFIGURE PLOT %%
 
-% Number of nodes
-n = size(x_plot,2)/2;
+% save data options
+% 0: dont save
+% 1: save .pdf
+% 2: save .eps
+SAVE_OPTIONS = 1;
 
-% Define minimum distances array
-min_dist = zeros(1,N);
+%% MAIN CODE %%
 
-for i = 1 : 1 : N
-    i
-    min_dist(i) = 1e+5;
-    for k = 1 : n-1
-        for j = k+1 : n
-            if A_plot(k,j,i) > 0 || A_plot(j,k,i) > 0
-                min_dist(i) = min(min_dist(i),sqrt((x_plot(i,2*(k-1)+1:2*k)-x_plot(i,2*(j-1)+1:2*j))*(x_plot(i,2*(k-1)+1:2*k)-x_plot(i,2*(j-1)+1:2*j))'));
+% define minimum distances array
+min_dist = ones(1, N)*1e+3;
+
+% temporal series
+t = 0:h:(N - 1)*h;
+
+for k = 1 : 1 : N
+    k
+    for i = 1 : n - 1
+        for j = i + 1 : n
+            if A_data(i, j, k) > 0 || A_data(j, i, k) > 0
+                min_dist(k) = min(min_dist(k), norm(x_data(i, 1:2, k) - x_data(j, 1:2, k)));
             end
         end
     end
 end
 
-plot([1:1:N],min_dist)
-xlabel('t'); 
-ylabel('$ min(x_{ij}) $','Interpreter','latex');
+% set axis limits
+plot(t, min_dist, 'Col' , 'k', 'LineWidth', 1);
+xlim([t(1) t(end)]);
+
+xlabel('Time (s)');
+ylabel('Minimum Distance (m)');
 grid on;
+
+% configure text font and size (use 'listfonts' to list all known fonts)
+set(findall(gcf, '-property', 'FontName'), 'FontName', 'Times New Roman')
+set(findall(gcf, '-property', 'FontSize'), 'FontSize', 16)
+
+pause(2)
+
+% get current picture
+fig = gcf;
+
+% figure position [left, bottom, width, height]
+set(fig, 'Units', 'Inches');
+pos = get(fig, 'Position');
+set(fig, 'PaperPositionMode', 'Auto', 'PaperUnits', 'Inches', 'PaperSize', [pos(3), pos(4)]);
+
+% save image plot
+if SAVE_OPTIONS == 1
+    imgname = strcat('mindist-', int2str(n), '-', int2str(N), '.pdf');
+    print('-dpdf', '-r0', imgname);
+elseif SAVE_OPTIONS == 2
+    imgname = strcat('mindist-', int2str(n), '-', int2str(N), '.eps');
+    print('-depsc2', '-tiff', imgname);
+end
+

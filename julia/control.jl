@@ -2,15 +2,16 @@
  = Control Module to Topology Control Algorithm in Julia
  =
  = Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
- = Last Change: 2020 Abr 11 14:53:49
+ = Last Change: 2020 Abr 11 18:25:21
  = Info: This file contains the motion control algorithms used in the topology
  = control algorithm.
  =============================================================================#
 
 module CONTROL
 
-using Convex    # cvx interface to solve convex problems
-using Gurobi    # to use Gurobi as optimization solver
+using Convex     # cvx interface to solve convex problems
+using Gurobi     # to use Gurobi as optimization solver
+#=using Mosek      # to use Mosek as optimization solver=#
 
 # public functions
 export cmc_init, mpc_1st_order, mpc_2nd_order
@@ -23,7 +24,7 @@ export cmc_init, mpc_1st_order, mpc_2nd_order
 function cmc_init(in_n, in_dk, in_p, in_gamma, in_u_min, in_u_max)
     # set global mpc parameters
     global const n = in_n
-    global const dk = in_dk
+    global const h = in_dk
     global const p = in_p
     global const gamma = in_gamma
     global const u_min = in_u_min
@@ -48,7 +49,7 @@ end
  = array to the neighborhood of i, h is the control step time, p is the
  = prediction horizon to the MPC and gamma is a weight array to MPC.
  =#
-function mpc_1st_order(i, Ai, Hi, Di, Si, n_ref, x, v, r_sec, r_cov, r_com, phi, RSSI_SENS)
+function mpc_1st_order(i, Ai, Hi, Di, Si, n_ref, x, v, c_sec, r_sec, r_cov, r_com, phi, RSSI_SENS)
     # auxiliary matrices definition
     Gixy = zeros(p, p)
     Githeta = zeros(p, p)
@@ -58,6 +59,12 @@ function mpc_1st_order(i, Ai, Hi, Di, Si, n_ref, x, v, r_sec, r_cov, r_com, phi,
     Xi = repmat(x[i, :]', p, 1)  # NOTE: after julia upgrade to 0.5 version, a subvector of a vector is ALWAYS a column vector.
     Vi0 = zeros(p, 3)
     Vi0[1, :] = v[i, :]
+
+    # SCP max iterations
+    smax = 30
+
+    # radius of the SCP search region
+    rho = 1
 
     # get the 1-hop neighbours of i
     N1 = find(Ai[1 : n])
@@ -94,11 +101,11 @@ function mpc_1st_order(i, Ai, Hi, Di, Si, n_ref, x, v, r_sec, r_cov, r_com, phi,
         #=println("i=$(i) j=$(j) a_ij=$(Ai[j]) α_ij=$(Hi[j]) φ_ij=$(phi_ij)")=#
 
         # fill auxiliary matrices
-        Gixy = Gixy + T'*dk*dk*psi_ij*gamma[1]/r_com[j]*T + phi_ij*gamma[2]/2*u_max[1]*I + (psi_ij - Hi[j])*gamma[3]/u_max[1]*I + T'*dk*dk*psi_ij*gamma[7]*T
-        Githeta = Githeta + T'*dk*dk*psi_ij*gamma[1]*T
-        fix = fix + (Xi[:, 1] - Xd[:, 1])'*dk*psi_ij*gamma[1]/r_com[j]*T + Vj[:, 1]'*phi_ij*gamma[2]/2*u_max[1] - Vj[:, 1]'*(psi_ij - Hi[j])*gamma[3]/u_max[1] - Sij'*dk*psi_ij*gamma[7]*T
-        fiy = fiy + (Xi[:, 2] - Xd[:, 2])'*dk*psi_ij*gamma[1]/r_com[j]*T + Vj[:, 2]'*phi_ij*gamma[2]/2*u_max[2] - Vj[:, 2]'*(psi_ij - Hi[j])*gamma[3]/u_max[2] - Sij'*dk*psi_ij*gamma[7]*T
-        fitheta = fitheta + (Xi[:, 3] - Xd[:, 3])'*dk*psi_ij*gamma[1]*T
+        Gixy = Gixy + T'*h*h*psi_ij*gamma[1]/r_com[j]*T + phi_ij*gamma[2]/2*u_max[1]*I + (psi_ij - Hi[j])*gamma[3]/u_max[1]*I + T'*h*h*psi_ij*gamma[7]*T
+        Githeta = Githeta + T'*h*h*psi_ij*gamma[1]*T
+        fix = fix + (Xi[:, 1] - Xd[:, 1])'*h*psi_ij*gamma[1]/r_com[j]*T + Vj[:, 1]'*phi_ij*gamma[2]/2*u_max[1] - Vj[:, 1]'*(psi_ij - Hi[j])*gamma[3]/u_max[1] - Sij'*h*psi_ij*gamma[7]*T
+        fiy = fiy + (Xi[:, 2] - Xd[:, 2])'*h*psi_ij*gamma[1]/r_com[j]*T + Vj[:, 2]'*phi_ij*gamma[2]/2*u_max[2] - Vj[:, 2]'*(psi_ij - Hi[j])*gamma[3]/u_max[2] - Sij'*h*psi_ij*gamma[7]*T
+        fitheta = fitheta + (Xi[:, 3] - Xd[:, 3])'*h*psi_ij*gamma[1]*T
     end
 
     # fill the auxiliary matrices for the references
@@ -108,9 +115,9 @@ function mpc_1st_order(i, Ai, Hi, Di, Si, n_ref, x, v, r_sec, r_cov, r_com, phi,
             Xr = repmat(x[r, :]', p, 1)
             Vr = repmat(v[r, :]', p, 1)
 
-            Gixy = Gixy + T'*dk*dk*Ai[r]*gamma[4]*T + Ai[r]*gamma[5]
-            fix = fix + (Xi[:, 1] - Xr[:, 1])'*dk*Ai[r]*gamma[4]*T - Vr[:, 1]'*Ai[r]*gamma[5]
-            fiy = fiy + (Xi[:, 2] - Xr[:, 2])'*dk*Ai[r]*gamma[4]*T - Vr[:, 2]'*Ai[r]*gamma[5]
+            Gixy = Gixy + T'*h*h*Ai[r]*gamma[4]*T + Ai[r]*gamma[5]
+            fix = fix + (Xi[:, 1] - Xr[:, 1])'*h*Ai[r]*gamma[4]*T - Vr[:, 1]'*Ai[r]*gamma[5]
+            fiy = fiy + (Xi[:, 2] - Xr[:, 2])'*h*Ai[r]*gamma[4]*T - Vr[:, 2]'*Ai[r]*gamma[5]
         end
     end
 
@@ -121,37 +128,78 @@ function mpc_1st_order(i, Ai, Hi, Di, Si, n_ref, x, v, r_sec, r_cov, r_com, phi,
     fiy = fiy - Vi0[:, 2]'*gamma[6]/u_max[2]*TI
     fitheta = fitheta - Vi0[:, 3]'*gamma[6]*TI
 
-    # declare optimization problem variables
-    Ux = Convex.Variable(p)
-    Uy = Convex.Variable(p)
-    Utheta = Convex.Variable(p)
+    # SCP start point
+    vs = v[i, :]
 
-    # objective function
-    problem = minimize(
-        (1/2)*Convex.quadform([Ux; Uy; Utheta], [Gixy zeros(p, p) zeros(p, p); zeros(p, p) Gixy zeros(p, p); zeros(p, p) zeros(p, p) Githeta]) + [fix fiy fitheta]*[Ux; Uy; Utheta],
-        # saturation constraints
-        Ux >= fill(u_min[1], p),
-        Uy >= fill(u_min[2], p),
-        Utheta >= fill(u_min[3], p),
-        Ux <= fill(u_max[1], p),
-        Uy <= fill(u_max[2], p),
-        Utheta <= fill(u_max[3], p)
-    )
+    # solve the MPC for each SCP iteration
+    for s = 1 : smax
 
-    # maximum distance between neighbours constraint
-    for j in N1
-        problem.constraints += norm(x[i, 1 : 2] + [Ux[1] Uy[1]]'*dk - x[j, 1 : 2]) <= r_com[j]
+        # declare optimization problem variables
+        Ux = Convex.Variable(p)
+        Uy = Convex.Variable(p)
+        Utheta = Convex.Variable(p)
+
+        # objective function
+        problem = minimize(
+            0.5*Convex.quadform([Ux; Uy; Utheta], [Gixy zeros(p, p) zeros(p, p); zeros(p, p) Gixy zeros(p, p); zeros(p, p) zeros(p, p) Githeta]) + [fix fiy fitheta]*[Ux; Uy; Utheta],
+            # saturation constraints
+            Ux >= fill(u_min[1], p),
+            Uy >= fill(u_min[2], p),
+            Utheta >= fill(u_min[3], p),
+            Ux <= fill(u_max[1], p),
+            Uy <= fill(u_max[2], p),
+            Utheta <= fill(u_max[3], p)
+        )
+
+        # maximum distance between neighbours constraint
+        for j in N1
+            problem.constraints += norm(x[i, 1 : 2] + [Ux[1] Uy[1]]'*h - x[j, 1 : 2]) <= r_com[j]
+
+            if c_sec == 1
+                # minimum distance constraint
+                problem.constraints += x[i, 1 : 2]'*x[i, 1 : 2] + 2*x[i, 1 : 2]'*h*vs[1 : 2] - 2*x[i, 1 : 2]'*x[j, 1 : 2] +
+                                    - 2*x[j, 1 : 2]'*h*vs[1 : 2] + h^2*vs[1 : 2]'*vs[1 : 2] + x[j, 1 : 2]'*x[j, 1 : 2] + (2*x[i, 1 : 2]'*h +
+                                    - 2*x[j, 1 : 2]'*h + 2*h^2*vs[1 : 2]')*([Ux[1] Uy[1]]' - vs[1 : 2]) >= (r_sec[i] + r_sec[j])^2
+            end
+        end
+
+        # limit the new velocity to be inside the security zone
+        problem.constraints += norm(vs[1 : 2] - [Ux[1] Uy[1]]', 1) <= rho
+
+        # solve the optimization problem
+        solve!(problem, GurobiSolver(OutputFlag = 0))
+
+        # verify if the solution unfeasible
+        if sum(isnan.(Ux.value)) > 0 || sum(isnan.(Uy.value)) > 0
+            # set the velocities as null if the maximum SCP step was reached
+            if s == smax
+                vs = [0, 0, 0]
+
+            # if not, start with a feasible random point
+            else
+                println("umin = $(u_min)  umax= $(u_max)")
+                vs = rand(u_min[1]:0.001:u_max[1], 3)
+            end
+
+        # verify if the solution is close enough to the last SCP step
+        elseif norm(vs[1 : 2] - [Ux.value[1] Uy.value[1]]') <= 0.001*norm([Ux.value[1] Uy.value[1]])
+            vs = [Ux.value[1] Uy.value[1] Utheta.value[1]]'
+            break
+
+        # update the current control action of the SCP step
+        else
+            vs = [Ux.value[1] Uy.value[1] Utheta.value[1]]'
+        end
     end
 
-    # solve the optimization problem
-    solve!(problem, GurobiSolver(OutputFlag = 0))
+#=    # verify if the problem was solved=#
+    #=if problem.status == :Optimal=#
+        #=return [Ux.value[1] Uy.value[1] Utheta.value[1]], ci=#
+    #=else=#
+        #=return [0.0 0.0 0.0], ci=#
+    #=end=#
 
-    # verify if the problem was solved
-    if problem.status == :Optimal
-        return [Ux.value[1] Uy.value[1] Utheta.value[1]], ci
-    else
-        return [0.0 0.0 0.0], ci
-    end
+    return vs, ci
 end
 
 #
@@ -173,7 +221,7 @@ function mpc_2nd_order(i, x, v, u, Ai, Hi, Di, Si, r_cov, r_com)
     Ui0[1, :] = u[i, :]
 
     # limits to velocity variation
-    const v_max = u_max[1]*dk
+    const v_max = u_max[1]*h
 
     # get the 1-hop neighbours of i
     N1 = find(Ai[1 : n])
@@ -199,22 +247,22 @@ function mpc_2nd_order(i, x, v, u, Ai, Hi, Di, Si, r_cov, r_com)
         psi_ij = Ai[j] + phi_ij             # activated for all neighbors (physical + virtual)
 
         # fill Hessian matrices for each neighbor
-        Hixy += T2'*dk^4*gamma[1]/r_com[j]*psi_ij*T2        # penalize position error
-        Hixy += T'*dk^2*gamma[2]/2*v_max*phi_ij*T           # penalize same direction velocities (on virtual neighbors)
-        Hixy += T'*dk^2*gamma[3]/v_max*(psi_ij - Hi[j])*T   # penalize different direction velocities (on physical neighbors)
-        Hitheta += T2'*dk^4*gamma[1]*psi_ij*T2
+        Hixy += T2'*h^4*gamma[1]/r_com[j]*psi_ij*T2        # penalize position error
+        Hixy += T'*h^2*gamma[2]/2*v_max*phi_ij*T           # penalize same direction velocities (on virtual neighbors)
+        Hixy += T'*h^2*gamma[3]/v_max*(psi_ij - Hi[j])*T   # penalize different direction velocities (on physical neighbors)
+        Hitheta += T2'*h^4*gamma[1]*psi_ij*T2
 
         # fill gradient matrices for each neighbor
-        gix += (Xi[:, 1] - Xij[:, 1])'*dk^2*gamma[1]/r_com[j]*psi_ij*T2
-        giy += (Xi[:, 2] - Xij[:, 2])'*dk^2*gamma[1]/r_com[j]*psi_ij*T2
-        githeta += (Xi[:, 3] - Xij[:, 3])'*dk^2*gamma[1]*psi_ij*T2
-        gix += Vi[:, 1]'*P'*dk^3*gamma[1]/r_com[j]*psi_ij*T2
-        giy += Vi[:, 2]'*P'*dk^3*gamma[1]/r_com[j]*psi_ij*T2
-        githeta += Vi[:, 3]'*P'*dk^3*gamma[1]*psi_ij*T2
-        gix += (Vi[:, 1] + Vj[:, 1])'*dk*gamma[2]/2*v_max*phi_ij*T
-        giy += (Vi[:, 2] + Vj[:, 2])'*dk*gamma[2]/2*v_max*phi_ij*T
-        gix += (Vi[:, 1] - Vj[:, 1])'*dk*gamma[3]/v_max*(psi_ij - Hi[j])*T
-        giy += (Vi[:, 2] - Vj[:, 2])'*dk*gamma[3]/v_max*(psi_ij - Hi[j])*T
+        gix += (Xi[:, 1] - Xij[:, 1])'*h^2*gamma[1]/r_com[j]*psi_ij*T2
+        giy += (Xi[:, 2] - Xij[:, 2])'*h^2*gamma[1]/r_com[j]*psi_ij*T2
+        githeta += (Xi[:, 3] - Xij[:, 3])'*h^2*gamma[1]*psi_ij*T2
+        gix += Vi[:, 1]'*P'*h^3*gamma[1]/r_com[j]*psi_ij*T2
+        giy += Vi[:, 2]'*P'*h^3*gamma[1]/r_com[j]*psi_ij*T2
+        githeta += Vi[:, 3]'*P'*h^3*gamma[1]*psi_ij*T2
+        gix += (Vi[:, 1] + Vj[:, 1])'*h*gamma[2]/2*v_max*phi_ij*T
+        giy += (Vi[:, 2] + Vj[:, 2])'*h*gamma[2]/2*v_max*phi_ij*T
+        gix += (Vi[:, 1] - Vj[:, 1])'*h*gamma[3]/v_max*(psi_ij - Hi[j])*T
+        giy += (Vi[:, 2] - Vj[:, 2])'*h*gamma[3]/v_max*(psi_ij - Hi[j])*T
     end
 
     # fill Hessian matrices
@@ -245,7 +293,7 @@ function mpc_2nd_order(i, x, v, u, Ai, Hi, Di, Si, r_cov, r_com)
 
     # maximum distance between neighbours constraint
     for j in N1
-        problem.constraints += norm(x[i, 1 : 2] + v[i, 1 : 2]*dk + [Ux[1] Uy[1]]'*dk^2 - x[j, 1 : 2]) <= r_com[j]
+        #problem.constraints += norm(x[i, 1 : 2] + v[i, 1 : 2]*h + [Ux[1] Uy[1]]'*h^2 - x[j, 1 : 2]) <= r_com[j]
     end
 
     # solve the optimization problem
