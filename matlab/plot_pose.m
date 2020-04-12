@@ -2,7 +2,7 @@
 % Robot's Position Plotter
 %
 % Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
-% Last Change: 2020 Abr 11 21:07:25
+% Last Change: 2020 Abr 12 17:20:14
 % Info: This code is able to plot the robot's positions from the topology
 % control algorithm
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -20,7 +20,7 @@ LINE_WIDTH = 1;
 % 1: save .pdf
 % 2: save .eps
 % 3: save .avi
-SAVE_OPTIONS = 1;
+SAVE_OPTIONS = 0;
 
 % set plot width and height [pixels]
 WIDTH = 300;
@@ -33,8 +33,8 @@ LOOP_TIME = 0;
 % 0: off
 % 1: show
 COM_RAD = 0;
-COV_RAD = 0;
-SEC_RAD = 1;
+COV_RAD = 1;
+SEC_RAD = 0;
 
 % show velocity directions
 % 0: off
@@ -99,7 +99,8 @@ ROBOT_LENGTH = 0.07*norm([xmin ymin] - [xmax ymax]);
 SPEED_LENGTH = 0.03*norm([xmin ymin] - [xmax ymax]);
 
 % start position plotting for robots
-for t = [1, 200, 300, 500, 1300, 1900]  % 1 : 50 : N
+%for t = [1, 200, 300, 500, 1300, 1900]
+for t = 1 : 10 : N
     newplot;
     hold on;
 

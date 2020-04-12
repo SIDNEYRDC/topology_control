@@ -6,11 +6,11 @@
 % 0: dont save
 % 1: save .pdf
 % 2: save .eps
-SAVE_OPTIONS = 1;
+SAVE_OPTIONS = 0;
 
 % set plot width and height [pixels]
-WIDTH = 512;
-HEIGHT = 230;
+WIDTH = 400;
+HEIGHT = 400;
 
 %% MAIN CODE %%
 
@@ -53,32 +53,26 @@ pause(2)
 %pos = get(fig, 'Position');
 %set(fig, 'PaperPositionMode', 'Auto', 'PaperUnits', 'Inches', 'PaperSize', [pos(3), pos(4)]);
 
-%% save image plot
-%if SAVE_OPTIONS == 1
+% save image plot
+if SAVE_OPTIONS == 1
     imgname = strcat('mindist-', int2str(n), '-', int2str(N), '.pdf');
-    %print('-dpdf', '-r0', imgname);
-%elseif SAVE_OPTIONS == 2
-    %imgname = strcat('mindist-', int2str(n), '-', int2str(N), '.eps');
-    %print('-depsc2', '-tiff', imgname);
-%end
 
-% set frame resolution and paper size
-set(gcf, 'MenuBar', 'none', ...
-         'Units', 'pixels', ...
-         'PaperUnits', 'centimeters', ...
-         'Resize', 'off', ...
-         'Position', [0, 0, WIDTH, HEIGHT], ...
-         'PaperSize', [0.026458*WIDTH, 0.026458*HEIGHT], ...
-         'PaperPosition', [0, 0, 0.026458*WIDTH, 0.026458*HEIGHT]);
+    % set frame resolution and paper size
+    set(gcf, 'MenuBar', 'none', ...
+             'Units', 'pixels', ...
+             'PaperUnits', 'centimeters', ...
+             'Resize', 'off', ...
+             'Position', [0, 0, WIDTH, HEIGHT], ...
+             'PaperSize', [0.026458*WIDTH, 0.026458*HEIGHT], ...
+             'PaperPosition', [0, 0, 0.026458*WIDTH, 0.026458*HEIGHT]);
 
-% wait for the correct size setting
-pause(1);
+    % wait for the correct size setting
+    pause(1);
 
-% set axis borders (optimize plot area)
-% set(gca, 'Units', 'pixels', 'LooseInset', [0, 0, 0, 0]);
-% set(gca, 'Units', 'pixels', 'LooseInset', [5, 25, 25, 5]);
+    % save as pdf
+    % print(gcf, '-dpdf', '-r600', '-bestfit', filename);
+    % print('-dpdf', '-r0', imgname);
+    print(gcf, '-dpdf', '-painters', imgname)
 
-% save as pdf
-% print(gcf, '-dpdf', '-r600', '-bestfit', filename);
-print(gcf, '-dpdf', '-painters', imgname)
+end
 

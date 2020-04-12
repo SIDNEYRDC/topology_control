@@ -4,7 +4,7 @@
  = Topology Control Algorithm using Consensus and MPC
  =
  = Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
- = Last Change: 2020 Abr 11 18:37:23
+ = Last Change: 2020 Abr 12 17:28:54
  = Info: This code is able to adapts the network topology to RSSI variations
  = and adjust the angle between the robots to reach the best connectivity
  =============================================================================#
@@ -277,7 +277,9 @@ for t = 1 : cfg.n_iter
                                                               r_cov[:, t],
                                                               r_com[:, t],
                                                               cfg.phi,
-                                                              cfg.rssi)
+                                                              cfg.rssi,
+                                                              cfg.s_max,
+                                                              cfg.rho)
 
             # solve 2nd order connectivity motion control (CMC)
 #=            u[i, :, t + 1] = mpc_2nd_order(i, x[:, :, t], v[:, :, t], u[:, :, t],=#

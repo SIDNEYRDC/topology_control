@@ -2,7 +2,7 @@
  = Control Module to Topology Control Algorithm in Julia
  =
  = Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
- = Last Change: 2020 Abr 11 18:25:21
+ = Last Change: 2020 Abr 12 17:35:21
  = Info: This file contains the motion control algorithms used in the topology
  = control algorithm.
  =============================================================================#
@@ -49,7 +49,7 @@ end
  = array to the neighborhood of i, h is the control step time, p is the
  = prediction horizon to the MPC and gamma is a weight array to MPC.
  =#
-function mpc_1st_order(i, Ai, Hi, Di, Si, n_ref, x, v, c_sec, r_sec, r_cov, r_com, phi, RSSI_SENS)
+function mpc_1st_order(i, Ai, Hi, Di, Si, n_ref, x, v, c_sec, r_sec, r_cov, r_com, phi, RSSI_SENS, s_max, rho)
     # auxiliary matrices definition
     Gixy = zeros(p, p)
     Githeta = zeros(p, p)
@@ -59,12 +59,6 @@ function mpc_1st_order(i, Ai, Hi, Di, Si, n_ref, x, v, c_sec, r_sec, r_cov, r_co
     Xi = repmat(x[i, :]', p, 1)  # NOTE: after julia upgrade to 0.5 version, a subvector of a vector is ALWAYS a column vector.
     Vi0 = zeros(p, 3)
     Vi0[1, :] = v[i, :]
-
-    # SCP max iterations
-    smax = 30
-
-    # radius of the SCP search region
-    rho = 1
 
     # get the 1-hop neighbours of i
     N1 = find(Ai[1 : n])
@@ -132,7 +126,7 @@ function mpc_1st_order(i, Ai, Hi, Di, Si, n_ref, x, v, c_sec, r_sec, r_cov, r_co
     vs = v[i, :]
 
     # solve the MPC for each SCP iteration
-    for s = 1 : smax
+    for s = 1 : s_max
 
         # declare optimization problem variables
         Ux = Convex.Variable(p)
@@ -172,7 +166,7 @@ function mpc_1st_order(i, Ai, Hi, Di, Si, n_ref, x, v, c_sec, r_sec, r_cov, r_co
         # verify if the solution unfeasible
         if sum(isnan.(Ux.value)) > 0 || sum(isnan.(Uy.value)) > 0
             # set the velocities as null if the maximum SCP step was reached
-            if s == smax
+            if s == s_max
                 vs = [0, 0, 0]
 
             # if not, start with a feasible random point
