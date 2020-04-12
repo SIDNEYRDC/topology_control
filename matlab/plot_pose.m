@@ -2,7 +2,7 @@
 % Robot's Position Plotter
 %
 % Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
-% Last Change: 2020 Abr 11 15:01:37
+% Last Change: 2020 Abr 11 21:07:25
 % Info: This code is able to plot the robot's positions from the topology
 % control algorithm
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -20,7 +20,11 @@ LINE_WIDTH = 1;
 % 1: save .pdf
 % 2: save .eps
 % 3: save .avi
-SAVE_OPTIONS = 0;
+SAVE_OPTIONS = 1;
+
+% set plot width and height [pixels]
+WIDTH = 300;
+HEIGHT = 300;
 
 % time for each iteration
 LOOP_TIME = 0;
@@ -29,7 +33,8 @@ LOOP_TIME = 0;
 % 0: off
 % 1: show
 COM_RAD = 0;
-COV_RAD = 1;
+COV_RAD = 0;
+SEC_RAD = 1;
 
 % show velocity directions
 % 0: off
@@ -54,6 +59,8 @@ if COM_RAD == 1
     slack = single(max(r_com(:)));
 elseif COV_RAD == 1
     slack = single(max(r_cov(:)));
+elseif SEC_RAD == 1
+    slack = single(max(r_sec(:)));
 else
     slack = single(max(r_cov(:))*0.5);
 end
@@ -88,11 +95,11 @@ end
 
 % set the object sizes according with the plot size
 ARROW_LENGTH = 0.04*norm([xmin ymin] - [xmax ymax]);
-ROBOT_LENGTH = 0.06*norm([xmin ymin] - [xmax ymax]);
+ROBOT_LENGTH = 0.07*norm([xmin ymin] - [xmax ymax]);
 SPEED_LENGTH = 0.03*norm([xmin ymin] - [xmax ymax]);
 
 % start position plotting for robots
-for t = 1 : 10 : N
+for t = [1, 200, 300, 500, 1300, 1900]  % 1 : 50 : N
     newplot;
     hold on;
 
@@ -163,6 +170,11 @@ for t = 1 : 10 : N
             uistack(viscircles(xi, r_cov(i, t), 'EdgeColor', 'k', 'LineWidth', 0.1, 'LineStyle', '-.'), 'bottom');
         end
 
+        % show coverage range
+        if SEC_RAD == 1
+            uistack(viscircles(xi, r_sec(i, t), 'EdgeColor', 'k', 'LineWidth', 0.1, 'LineStyle', '-.'), 'bottom');
+        end
+
         % plot the agent's path
         xpose = x_data(i, 1, 1 : t);
         ypose = x_data(i, 2, 1 : t);
@@ -175,7 +187,7 @@ for t = 1 : 10 : N
 
     % configure text font and size (use 'listfonts' to list all known fonts)
     set(findall(gcf, '-property', 'FontName'), 'FontName', 'Times New Roman')
-    set(findall(gcf, '-property', 'FontSize'), 'FontSize', 12)
+    set(findall(gcf, '-property', 'FontSize'), 'FontSize', 9)
 
     % set axis labels
     xlabel('x [m]');
@@ -183,8 +195,8 @@ for t = 1 : 10 : N
 
     % set axis configurations
     axis([xmin xmax ymin ymax]);
-    axis equal;
-    axis manual;
+    %axis equal;
+    %axis manual;
 
     % enable box around the figure
     box on;
@@ -204,13 +216,25 @@ for t = 1 : 10 : N
     if SAVE_OPTIONS == 1
         % set print size
         fig = gcf;
-        fig.PaperSize = [3 3];
+        fig.PaperSize = [4 4];
 
-        imgname = strcat('test2_pose-', int2str(t));
+%        % set frame resolution and paper size
+        %set(gcf, 'MenuBar', 'none', ...
+                 %'Units', 'pixels', ...
+                 %'PaperUnits', 'centimeters', ...
+                 %'Resize', 'off', ...
+                 %'Position', [0, 0, WIDTH, HEIGHT], ...
+                 %'PaperSize', [0.026458*WIDTH, 0.026458*HEIGHT], ...
+                 %'PaperPosition', [0, 0, 0.026458*WIDTH, 0.026458*HEIGHT]);
+
+        % wait for the correct size setting
+        %pause(1);
+
+        % save as pdf
+        imgname = strcat('tccm_test3_pose-', int2str(t));
         print(fig, '-dpdf', '-fillpage', imgname);
-        %print2eps(imgname, fig);
-        %eps2pdf(strcat(imgname, '.eps'), strcat(imgname, '.pdf'));
-        %delete(strcat(imgname, '.eps'));
+        %print(gcf, '-dpdf', '-painters', imgname);
+
     elseif SAVE_OPTIONS == 2
         imgname = strcat('pose-', int2str(t));
         print('-depsc2', '-tiff', imgname);

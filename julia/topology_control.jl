@@ -4,7 +4,7 @@
  = Topology Control Algorithm using Consensus and MPC
  =
  = Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
- = Last Change: 2020 Abr 11 17:05:08
+ = Last Change: 2020 Abr 11 18:37:23
  = Info: This code is able to adapts the network topology to RSSI variations
  = and adjust the angle between the robots to reach the best connectivity
  =============================================================================#
@@ -323,6 +323,7 @@ write(file, "v_data", v)
 write(file, "u_data", u)
 write(file, "r_com", r_com)
 write(file, "r_cov", r_cov)
+write(file, "r_sec", r_sec)
 write(file, "A_data", max.(A[:, 1 : cfg.n_bot, :], H))
 write(file, "H_data", H)
 write(file, "S_data", S)
