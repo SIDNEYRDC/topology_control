@@ -2,7 +2,7 @@
 % Robot's Position Plotter
 %
 % Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
-% Last Change: 2020 Abr 12 17:20:14
+% Last Change: 2020 Abr 13 18:13:29
 % Info: This code is able to plot the robot's positions from the topology
 % control algorithm
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -34,7 +34,7 @@ LOOP_TIME = 0;
 % 1: show
 COM_RAD = 0;
 COV_RAD = 1;
-SEC_RAD = 0;
+SEC_RAD = 1;
 
 % show velocity directions
 % 0: off
@@ -100,7 +100,7 @@ SPEED_LENGTH = 0.03*norm([xmin ymin] - [xmax ymax]);
 
 % start position plotting for robots
 %for t = [1, 200, 300, 500, 1300, 1900]
-for t = 1 : 10 : N
+for t = 1 : 5 : N
     newplot;
     hold on;
 
@@ -179,7 +179,7 @@ for t = 1 : 10 : N
         % plot the agent's path
         xpose = x_data(i, 1, 1 : t);
         ypose = x_data(i, 2, 1 : t);
-        plot(xpose(:), ypose(:), 'g-');
+        uistack(plot(xpose(:), ypose(:), 'g-'), 'bottom');
 
         % plot the robot's name and shape
         draw_robot(xi, x_data(i, 3, t), ROBOT_LENGTH, 'RobotShape', 'c', 'RobotLabel', num2str(i), 'FillColor', 'w');
