@@ -2,7 +2,7 @@
  = File Module to Topology Control Algorithm
  =
  = Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
- = Last Change: 2020 Abr 12 17:31:31
+ = Last Change: 2020 Abr 13 20:41:11
  = Info: This source contains the module to access text files in julia.
  =============================================================================#
 
@@ -47,6 +47,7 @@ type Conf
     r_cov::Array{Float32, 1}
     r_com::Array{Float32, 1}
     timeout::Array{Float32, 1}
+    rssi_var::Array{Float32, 2}
 end
 
 #
@@ -65,7 +66,7 @@ function read_conf(input)
     file = replace(replace(string(split(file, r"\#.*\n")), "\",\"", ""), "\\n", '\n')
 
     # the output file
-    output = Conf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, [0], [0], [0], 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, [0 0], [0 0], [0], [0], [0], [0])
+    output = Conf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, [0], [0], [0], 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, [0 0], [0 0], [0], [0], [0], [0], [0 0 0 0 0])
 
     # extract data
     output.n_iter = extract_data("n\\_iter:\\s*\\d+", "simulation-setup", file)
@@ -119,6 +120,21 @@ function read_conf(input)
         # extract timeout
         timeout = extract_data("$(i):\\s*\\d+", "timeout", file, false)
         timeout != nothing ? output.timeout[i] = timeout : 0
+
+        # extract rssi-variation
+        for j = 1 : output.n_bot
+            rssi_var = extract_data("$(i)-$(j):(\\s*\\d+\\.?\\d*(\\s+|\\n)){3}", "rssi-variation", file, false)
+
+            # check if there is rssi attenuation to the link (i, j)
+            if rssi_var != nothing
+                output.rssi_var = [output.rssi_var; i j rssi_var']
+            end
+        end
+    end
+
+    # crop rssi_var array removing the extra zeros
+    if size(output.rssi_var, 1) > 1
+        output.rssi_var = output.rssi_var[2:end, :]
     end
 
     return output
