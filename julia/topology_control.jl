@@ -4,7 +4,7 @@
  = Topology Control Algorithm using Consensus and MPC
  =
  = Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
- = Last Change: 2020 Abr 13 18:09:08
+ = Last Change: 2020 Abr 14 00:48:38
  = Info: This code is able to adapts the network topology to RSSI variations
  = and adjust the angle between the robots to reach the best connectivity
  =============================================================================#
@@ -131,8 +131,44 @@ for t = 1 : cfg.n_iter
                 # euclidean distance between i and j
                 D[i, j, t] = D[j, i, t] = norm(x[i, 1 : 2, t] - x[j, 1 : 2, t])
 
+                id_i0 = []
+                !isdefined(:rssi_var_i0j1) ? id_i0 = find(cfg.rssi_var[:, 1] .== i) : 0
+                id_j0 = find(cfg.rssi_var[:, 1] .== j)
+
+                if !isempty(id_i0) && !isdefined(:rssi_var_i0j1)
+                    global rssi_var_i0j1 = cfg.rssi_var[id_i0, :]
+                    id_j1 = find(rssi_var_i0j1[:, 2] .== j)
+                    global rssi_var_i0j1 = rssi_var_i0j1[id_j1, :]
+
+                    println("i=$(i)  j=$(j)  rssivar=$(rssi_var_i0j1)  empty=$(isempty(rssi_var_i0j1))")
+
+                end
+
+                if isdefined(:rssi_var_i0j1) && !isempty(rssi_var_i0j1) && t > rssi_var_i0j1[3] && t < rssi_var_i0j1[4]
+                    R[i, j] = -rssi_var_i0j1[5]
+
+                else
+                    R[i, j] = 0
+                end
+
+                if !isempty(id_j0)
+                    rssi_var = cfg.rssi_var[id_j0, :]
+                    id_i1 = find(rssi_var[:, 2] .== i)
+                    rssi_var = rssi_var[id_i1, :]
+
+                    println("j=$(j)  i=$(i)  rssivar=$(rssi_var)  empty=$(isempty(rssi_var))")
+
+                    if !isempty(rssi_var) && t > rssi_var[3] && t < rssi_var[4]
+                        R[j, i] = -rssi_var[5]
+
+                    else
+                        R[j, i] = 0
+                    end
+
+                end
+
                 # simulate a decrease in the signal strength
-                i == 1 && t > 80 && t < 250 ? R[i, j] = R[j, i] = -5 : R[i, j] = R[j, i] = 0
+                #=i == 1 && t > 80 && t < 250 ? R[i, j] = R[j, i] = -5 : R[i, j] = R[j, i] = 0=#
 
                 # fill RSSI matrix using the model: Sij = - 10 ∙ Φ ∙ log(dij) + C
                 # can be found in: doi.org/10.1109/ICIT.2013.6505900
