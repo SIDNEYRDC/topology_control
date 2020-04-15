@@ -2,7 +2,7 @@
  = File Module to Topology Control Algorithm
  =
  = Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
- = Last Change: 2020 Abr 13 20:41:11
+ = Last Change: 2020 Abr 14 21:32:03
  = Info: This source contains the module to access text files in julia.
  =============================================================================#
 
@@ -123,7 +123,7 @@ function read_conf(input)
 
         # extract rssi-variation
         for j = 1 : output.n_bot
-            rssi_var = extract_data("$(i)-$(j):(\\s*\\d+\\.?\\d*(\\s+|\\n)){3}", "rssi-variation", file, false)
+            rssi_var = extract_data("$(i)-$(j):(\\s*\\-?\\d+\\.?\\d*(\\s+|\\n)){3}", "rssi-variation", file, false)
 
             # check if there is rssi attenuation to the link (i, j)
             if rssi_var != nothing
