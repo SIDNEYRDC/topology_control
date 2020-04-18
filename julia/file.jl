@@ -2,7 +2,7 @@
  = File Module to Topology Control Algorithm
  =
  = Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
- = Last Change: 2020 Abr 14 21:32:03
+ = Last Change: 2020 Abr 18 03:01:52
  = Info: This source contains the module to access text files in julia.
  =============================================================================#
 
@@ -130,6 +130,14 @@ function read_conf(input)
                 output.rssi_var = [output.rssi_var; i j rssi_var']
             end
         end
+
+        # extract external-robots
+        ext_bots = extract_data("$(i):\\s*\\d+\\s*\\'\\w+\\'", "external-robots", file, false)
+
+        if ext_bots != nothing
+            str = String(Vector{UInt8}(ext_bots[2:end]))
+            println("i=$(i)  ext_bots=$(ext_bots) str=$(str)")
+        end
     end
 
     # crop rssi_var array removing the extra zeros
@@ -158,7 +166,7 @@ function extract_data(expr, group, input, mandatory = true)
     # verify if the group has been found
     if gs == nothing
         print_with_color(:red, "ERROR: group '$(group)' not found in the configuration file!\n")
-        exit(1)
+        #=exit(1)=#
     end
 
     # find the group boundary
@@ -170,7 +178,7 @@ function extract_data(expr, group, input, mandatory = true)
     # exit if there is no compatible string
     if m == nothing && mandatory == true
         print_with_color(:red, "ERROR: key '$(expr)' not found in the configuration file!\n")
-        exit(1)
+        #=exit(1)=#
     elseif m == nothing
         return
     end
@@ -184,8 +192,25 @@ function extract_data(expr, group, input, mandatory = true)
     # remove the null characters ("")
     splitted = splitted[find(splitted .!= "")]
 
+    println("splt=$(splitted)  size=$(splitted)")
+
     if length(splitted) > 1
-        return map(x->parse(Float32, x), splitted)
+
+        # detect string as parameters
+        si = nothing
+        length(splitted) == 2 ? si = match(Regex("\\'\\w+\\'"), splitted[2]) : si == nothing
+
+        println(si)
+
+        if si == nothing
+            return map(x->parse(Float32, x), splitted)
+
+        else
+
+            # TODO: need to be improved
+            return [parse(Float32, splitted[1]); Vector{UInt8}(splitted[2])]
+        end
+
     elseif length(splitted) > 0
         return parse(Float32, splitted[1])
     end

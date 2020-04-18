@@ -4,7 +4,7 @@
  = Topology Control Algorithm using Consensus and MPC
  =
  = Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
- = Last Change: 2020 Abr 14 22:29:24
+ = Last Change: 2020 Abr 17 10:45:45
  = Info: This code is able to adapts the network topology to RSSI variations
  = and adjust the angle between the robots to reach the best connectivity
  =============================================================================#
@@ -178,9 +178,6 @@ for t = 1 : cfg.n_iter
                     end
 
                 end
-
-                # simulate a decrease in the signal strength
-                #=i == 1 && t > 80 && t < 250 ? R[i, j] = R[j, i] = -5 : R[i, j] = R[j, i] = 0=#
 
                 # fill RSSI matrix using the model: Sij = - 10 ∙ Φ ∙ log(dij) + C
                 # can be found in: doi.org/10.1109/ICIT.2013.6505900
