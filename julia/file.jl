@@ -2,7 +2,7 @@
  = File Module to Topology Control Algorithm
  =
  = Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
- = Last Change: 2020 Abr 18 03:01:52
+ = Last Change: 2020 Abr 19 19:11:43
  = Info: This source contains the module to access text files in julia.
  =============================================================================#
 
@@ -48,6 +48,7 @@ type Conf
     r_com::Array{Float32, 1}
     timeout::Array{Float32, 1}
     rssi_var::Array{Float32, 2}
+    ext_bots::Array{Any, 2}
 end
 
 #
@@ -66,7 +67,7 @@ function read_conf(input)
     file = replace(replace(string(split(file, r"\#.*\n")), "\",\"", ""), "\\n", '\n')
 
     # the output file
-    output = Conf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, [0], [0], [0], 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, [0 0], [0 0], [0], [0], [0], [0], [0 0 0 0 0])
+    output = Conf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, [0], [0], [0], 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, [0 0], [0 0], [0], [0], [0], [0], [0 0 0 0 0], [0 0 ""])
 
     # extract data
     output.n_iter = extract_data("n\\_iter:\\s*\\d+", "simulation-setup", file)
@@ -135,14 +136,22 @@ function read_conf(input)
         ext_bots = extract_data("$(i):\\s*\\d+\\s*\\'\\w+\\'", "external-robots", file, false)
 
         if ext_bots != nothing
-            str = String(Vector{UInt8}(ext_bots[2:end]))
-            println("i=$(i)  ext_bots=$(ext_bots) str=$(str)")
+            # extract string from float array
+            str = String(Vector{UInt8}(ext_bots[3:end-1]))
+
+            # add extracted data to the output array
+            output.ext_bots = [output.ext_bots; i Int64(ext_bots[1]) str]
         end
     end
 
     # crop rssi_var array removing the extra zeros
     if size(output.rssi_var, 1) > 1
         output.rssi_var = output.rssi_var[2:end, :]
+    end
+
+    # crop ext_bots array removing the extra zeros
+    if size(output.ext_bots, 1) > 1
+        output.ext_bots = output.ext_bots[2:end, :]
     end
 
     return output
@@ -164,9 +173,12 @@ function extract_data(expr, group, input, mandatory = true)
     gs = match(Regex("\\[$(replace(group, "-", "\\-"))\\]"), input)
 
     # verify if the group has been found
-    if gs == nothing
+    if gs == nothing && mandatory == true
         print_with_color(:red, "ERROR: group '$(group)' not found in the configuration file!\n")
-        #=exit(1)=#
+        exit(1)
+
+    elseif gs == nothing && mandatory == false
+        return
     end
 
     # find the group boundary
@@ -178,7 +190,7 @@ function extract_data(expr, group, input, mandatory = true)
     # exit if there is no compatible string
     if m == nothing && mandatory == true
         print_with_color(:red, "ERROR: key '$(expr)' not found in the configuration file!\n")
-        #=exit(1)=#
+        exit(1)
     elseif m == nothing
         return
     end
@@ -192,15 +204,11 @@ function extract_data(expr, group, input, mandatory = true)
     # remove the null characters ("")
     splitted = splitted[find(splitted .!= "")]
 
-    println("splt=$(splitted)  size=$(splitted)")
-
     if length(splitted) > 1
 
         # detect string as parameters
         si = nothing
         length(splitted) == 2 ? si = match(Regex("\\'\\w+\\'"), splitted[2]) : si == nothing
-
-        println(si)
 
         if si == nothing
             return map(x->parse(Float32, x), splitted)
