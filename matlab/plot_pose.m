@@ -2,7 +2,7 @@
 % Robot's Position Plotter
 %
 % Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
-% Last Change: 2020 Abr 13 18:13:29
+% Last Change: 2020 Ago 18 00:04:09
 % Info: This code is able to plot the robot's positions from the topology
 % control algorithm
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -20,7 +20,7 @@ LINE_WIDTH = 1;
 % 1: save .pdf
 % 2: save .eps
 % 3: save .avi
-SAVE_OPTIONS = 0;
+SAVE_OPTIONS = 1;
 
 % set plot width and height [pixels]
 WIDTH = 300;
@@ -34,7 +34,7 @@ LOOP_TIME = 0;
 % 1: show
 COM_RAD = 0;
 COV_RAD = 1;
-SEC_RAD = 1;
+SEC_RAD = 0;
 
 % show velocity directions
 % 0: off
@@ -99,8 +99,8 @@ ROBOT_LENGTH = 0.07*norm([xmin ymin] - [xmax ymax]);
 SPEED_LENGTH = 0.03*norm([xmin ymin] - [xmax ymax]);
 
 % start position plotting for robots
-%for t = [1, 200, 300, 500, 1300, 1900]
-for t = 1 : 5 : N
+for t = [1, 20, 50, 60, 100, 130, 180, 190, 230, N-1]
+%for t = 1 : 10 : N
     newplot;
     hold on;
 
@@ -216,25 +216,25 @@ for t = 1 : 5 : N
     % save file options
     if SAVE_OPTIONS == 1
         % set print size
-        fig = gcf;
-        fig.PaperSize = [4 4];
+        %fig = gcf;
+        %fig.PaperSize = [4 4];
 
-%        % set frame resolution and paper size
-        %set(gcf, 'MenuBar', 'none', ...
-                 %'Units', 'pixels', ...
-                 %'PaperUnits', 'centimeters', ...
-                 %'Resize', 'off', ...
-                 %'Position', [0, 0, WIDTH, HEIGHT], ...
-                 %'PaperSize', [0.026458*WIDTH, 0.026458*HEIGHT], ...
-                 %'PaperPosition', [0, 0, 0.026458*WIDTH, 0.026458*HEIGHT]);
+        % set frame resolution and paper size
+        set(gcf, 'MenuBar', 'none', ...
+                 'Units', 'pixels', ...
+                 'PaperUnits', 'centimeters', ...
+                 'Resize', 'off', ...
+                 'Position', [0, 0, WIDTH, HEIGHT], ...
+                 'PaperSize', [0.026458*WIDTH, 0.026458*HEIGHT], ...
+                 'PaperPosition', [0, 0, 0.026458*WIDTH, 0.026458*HEIGHT]);
 
         % wait for the correct size setting
-        %pause(1);
+        pause(1);
 
         % save as pdf
-        imgname = strcat('tccm_test3_pose-', int2str(t));
-        print(fig, '-dpdf', '-fillpage', imgname);
-        %print(gcf, '-dpdf', '-painters', imgname);
+        imgname = strcat('tccm_exp2_pose-', int2str(t));
+        %print(fig, '-dpdf', '-fillpage', imgname);
+        print(gcf, '-dpdf', '-painters', imgname);
 
     elseif SAVE_OPTIONS == 2
         imgname = strcat('pose-', int2str(t));
