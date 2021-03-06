@@ -33,8 +33,8 @@ LOOP_TIME = 0;
 % 0: off
 % 1: show
 COM_RAD = 0;
-COV_RAD = 1;
-SEC_RAD = 0;
+COV_RAD = 0;
+SEC_RAD = 1;
 
 % show velocity directions
 % 0: off
@@ -99,8 +99,8 @@ ROBOT_LENGTH = 0.07*norm([xmin ymin] - [xmax ymax]);
 SPEED_LENGTH = 0.03*norm([xmin ymin] - [xmax ymax]);
 
 % start position plotting for robots
-for t = [1, 20, 50, 60, 100, 130, 180, 190, 230, N-1]
-%for t = 1 : 10 : N
+for t = [1, 100, 200, 300, 450, 600, 750, 900, 1150, N-1]
+% for t = 1 : 50 : N
     newplot;
     hold on;
 
@@ -232,7 +232,7 @@ for t = [1, 20, 50, 60, 100, 130, 180, 190, 230, N-1]
         pause(1);
 
         % save as pdf
-        imgname = strcat('tccm_exp2_pose-', int2str(t));
+        imgname = strcat('tccm_exp3_pose-', int2str(t));
         %print(fig, '-dpdf', '-fillpage', imgname);
         print(gcf, '-dpdf', '-painters', imgname);
 

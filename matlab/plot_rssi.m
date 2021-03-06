@@ -2,7 +2,7 @@
 % RSSI Readings plotter
 %
 % Maintainer: Sidney Carvalho - sydney.rdc@gmail.com
-% Last Change: 2020 Ago 18 01:16:04
+% Last Change: 2020 Ago 18 14:29:12
 % Info: This code is able to plot the RSSI readings from the Communication
 % Topology Control Algorithm.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -13,11 +13,11 @@
 % 0: dont save
 % 1: save .pdf
 % 2: save .eps
-SAVE_OPTIONS = 0;
+SAVE_OPTIONS = 1;
 
 % set plot width and height [pixels]
-WIDTH = 268.346456693 + 24.94488189;
-HEIGHT = 241.88976378 + 13.606299213;
+WIDTH = 268.346456693 + 24.94488189 + 2*3.779527559;
+HEIGHT = 241.88976378 + 13.606299213 + 3.779527559;
 
 %% MAIN CODE %%
 
